@@ -1,0 +1,4 @@
+PySide6==6.5.1.1
+redis==4.6.0
+SQLAlchemy==2.0.20
+sshtunnel==0.4.0
