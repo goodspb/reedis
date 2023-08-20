@@ -1,3 +1,5 @@
+import json
+
 from PySide6.QtWidgets import QDialog, QMessageBox
 from redis.client import Redis
 
@@ -21,13 +23,20 @@ class AddMemberDialog(QDialog):
         if self.key_type == 'list':
             self._hide_field_layout()
             self._hide_score_layout()
+            self._hide_id_layout()
         elif self.key_type == 'hash':
             self._hide_score_layout()
+            self._hide_id_layout()
         elif self.key_type == 'set':
             self._hide_field_layout()
             self._hide_score_layout()
+            self._hide_id_layout()
         elif self.key_type == 'zset':
             self._hide_field_layout()
+            self._hide_id_layout()
+        elif self.key_type == 'stream':
+            self._hide_field_layout()
+            self._hide_score_layout()
 
     def _hide_field_layout(self):
         for i in range(self.ui.FieldLayout.count()):
@@ -37,9 +46,14 @@ class AddMemberDialog(QDialog):
         for i in range(self.ui.ScoreLayout.count()):
             self.ui.ScoreLayout.itemAt(i).widget().hide()
 
+    def _hide_id_layout(self):
+        for i in range(self.ui.IdLayout.count()):
+            self.ui.IdLayout.itemAt(i).widget().hide()
+
     def save_member_clicked(self):
         field = self.ui.FieldInput.text()
         score = self.ui.ScoreInput.text()
+        stream_id = self.ui.IdInput.text()
         value = self.ui.ValueTextEdit.toPlainText()
         if self.key_type == 'list':
             self.r.rpush(self.key, value)
@@ -49,4 +63,11 @@ class AddMemberDialog(QDialog):
             self.r.sadd(self.key, value)
         elif self.key_type == 'zset':
             self.r.zadd(self.key, {value: score})
+        elif self.key_type == 'stream':
+            try:
+                fields = json.loads(value)
+            except Exception as e:
+                QMessageBox.warning(self, 'Error', 'Value must be Json Object.', QMessageBox.StandardButton.Ok)
+                return
+            self.r.xadd(self.key, fields, stream_id)
         self.parent._update_content(self.r, self.key, self.key_type)

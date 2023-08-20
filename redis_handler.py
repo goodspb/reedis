@@ -28,6 +28,7 @@ def get_redis_connection(connection: Connection):
             host=connection.host,
             port=connection.port,
             db=0,
+            decode_responses=True,
             password=connection.password if connection.password else None,
             ssl=connection.ssl,
             ssl_keyfile=connection.ssl_private_key if connection.ssl_private_key else None,
@@ -39,6 +40,7 @@ def get_redis_connection(connection: Connection):
             host=connection.host,
             port=connection.port,
             db=0,
+            decode_responses=True,
             password=connection.password if connection.password else None,
             ssl=connection.ssl,
             ssl_keyfile=connection.ssl_private_key if connection.ssl_private_key else None,
@@ -61,5 +63,5 @@ def get_keys(r, match_text = None):
     keys = r.scan_iter(match=match_text)
     key_list = []
     for key in keys:
-        key_list.append(key.decode(errors='ignore'))
+        key_list.append(key)
     return key_list

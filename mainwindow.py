@@ -46,6 +46,12 @@ class MainWindow(QMainWindow):
         self.ui.contentTable.customContextMenuRequested[QPoint].connect(self.table_content_list_menu)
         self.ui.addMemberButton.clicked.connect(self.add_member_clicked)
         self.ui.contentTypeList.activated.connect(self.content_type_list_selected)
+        self.ui.maxLabel.hide()
+        self.ui.maxLineEdit.hide()
+        self.ui.minLabel.hide()
+        self.ui.minLineEdit.hide()
+        self.ui.maxLineEdit.returnPressed.connect(self.stream_min_or_max_press)
+        self.ui.minLineEdit.returnPressed.connect(self.stream_min_or_max_press)
         self.key_editing_old = None
         self.connected_redis = None
         self.shown_redis_key = None
@@ -138,7 +144,7 @@ class MainWindow(QMainWindow):
         r = self.connected_redis
         key_type = r.type(k)
         print(f"key_click type: {key_type}")
-        key_type_str = key_type.decode(errors='ignore')
+        key_type_str = key_type
         self.ui.typeShowInput.setText(key_type_str)
         self.shown_redis_key = {
             "key": k,
@@ -179,6 +185,11 @@ class MainWindow(QMainWindow):
         self._search_input_key()
 
     def _update_content(self, r, key, key_type):
+        self.ui.maxLabel.hide()
+        self.ui.maxLineEdit.hide()
+        self.ui.minLabel.hide()
+        self.ui.minLineEdit.hide()
+
         ttl = r.ttl(key)
         print(f"key_click ttl: {ttl}")
         self.ui.ttlShowEditInput.setText(str(ttl))
@@ -191,7 +202,7 @@ class MainWindow(QMainWindow):
         if key_type == 'string':
             self.ui.stackedContents.setCurrentIndex(0)
             content = r.get(key)
-            content_str = content.decode(errors='ignore')
+            content_str = content
             print(f"key_click string value {content_str}, size: {len(content_str)}")
             self.ui.sizeLabel.setText(f"Size: {len(content_str)}")
             content_type = self.ui.contentTypeList.currentText()
@@ -212,40 +223,56 @@ class MainWindow(QMainWindow):
             index = 0
             for item in lst:
                 model.insertRow(index)
-                model.setData(model.index(index, 0), item.decode(errors='ignore'))
+                model.setData(model.index(index, 0), item)
                 index += 1
         elif key_type == 'hash':
             self.ui.stackedContents.setCurrentIndex(1)
             lst = r.hgetall(key)
-            print(f"key_click list value: {lst}")
+            print(f"key_click hash value: {lst}")
             model.setHorizontalHeaderLabels(['Key', 'Value'])
             index = 0
             for k, v in lst.items():
                 model.insertRow(index)
-                model.setData(model.index(index, 0), k.decode(errors='ignore'))
-                model.setData(model.index(index, 1), v.decode(errors='ignore'))
+                model.setData(model.index(index, 0), k)
+                model.setData(model.index(index, 1), v)
                 index += 1
         elif key_type == 'set':
             self.ui.stackedContents.setCurrentIndex(1)
             lst = r.smembers(key)
-            print(f"key_click list value: {lst}")
+            print(f"key_click set value: {lst}")
             model.setHorizontalHeaderLabels(['Value'])
             index = 0
             for item in lst:
                 model.insertRow(index)
-                model.setData(model.index(index, 0), item.decode(errors='ignore'))
+                model.setData(model.index(index, 0), item)
                 index += 1
         elif key_type == 'zset':
             self.ui.stackedContents.setCurrentIndex(1)
             lst = r.zrange(key, 0, -1, withscores=True)
-            print(f"key_click list value: {lst}")
+            print(f"key_click zset value: {lst}")
             model.setHorizontalHeaderLabels(['Score', 'Member'])
             index = 0
             for item in lst:
                 member, score = item
                 model.insertRow(index)
                 model.setData(model.index(index, 0), score)
-                model.setData(model.index(index, 1), member.decode(errors='ignore'))
+                model.setData(model.index(index, 1), member)
+                index += 1
+        elif key_type == 'stream':
+            self.ui.maxLabel.show()
+            self.ui.maxLineEdit.show()
+            self.ui.minLabel.show()
+            self.ui.minLineEdit.show()
+            self.ui.stackedContents.setCurrentIndex(1)
+            lst = r.xrange(key, self.ui.minLineEdit.text(), self.ui.maxLineEdit.text())
+            print(f"key_click stream value: {lst}")
+            model.setHorizontalHeaderLabels(['ID', 'Value'])
+            index = 0
+            for item in lst:
+                stream_id, stream_value = item
+                model.insertRow(index)
+                model.setData(model.index(index, 0), stream_id)
+                model.setData(model.index(index, 1), json.dumps(stream_value))
                 index += 1
 
     def save_content_clicked(self):
@@ -341,7 +368,15 @@ class MainWindow(QMainWindow):
             member = self.ui.contentTable.model().data(member_index)
             print(f"member: {member}")
             r.zrem(key, member)
+        elif key_type == 'stream':
+            stream_id_index = self.ui.contentTable.model().index(current_index.row(), 0)
+            stream_id = self.ui.contentTable.model().data(stream_id_index)
+            print(f"stream_id: {stream_id}")
+            r.xdel(key, stream_id)
         self._update_content(r, key, key_type)
+
+    def stream_min_or_max_press(self):
+        self.refresh_content_clicked()
 
 
 if __name__ == "__main__":

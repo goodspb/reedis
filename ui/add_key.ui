@@ -70,6 +70,11 @@
         <string notr="true">zset</string>
        </property>
       </item>
+      <item>
+       <property name="text">
+        <string>stream</string>
+       </property>
+      </item>
      </widget>
     </widget>
    </item>

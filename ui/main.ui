@@ -155,7 +155,7 @@
       <item>
        <widget class="QStackedWidget" name="stackedContents">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="contentStrEditPage">
          <property name="autoFillBackground">
@@ -237,6 +237,34 @@
              <widget class="QPushButton" name="addMemberButton">
               <property name="text">
                <string>Add member</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="maxLabel">
+              <property name="text">
+               <string>Max</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="maxLineEdit">
+              <property name="text">
+               <string>+</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="minLabel">
+              <property name="text">
+               <string>Min</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="minLineEdit">
+              <property name="text">
+               <string>-</string>
               </property>
              </widget>
             </item>

@@ -30,5 +30,7 @@ class AddKeyDialog(QDialog):
             self.r.sadd(key_name, "New Set")
         elif key_type == 'zset':
             self.r.zadd(key_name, {"New ZSet": 1.0})
+        elif key_type == 'stream':
+            self.r.xadd(key_name, {"New Stream": "New Value"})
         # refresh key list
         self.parent._search_input_key()

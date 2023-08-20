@@ -58,6 +58,7 @@ class Ui_AddKeyDialog(object):
         self.keyTypeList.addItem(u"list")
         self.keyTypeList.addItem(u"set")
         self.keyTypeList.addItem(u"zset")
+        self.keyTypeList.addItem("")
         self.keyTypeList.setObjectName(u"keyTypeList")
         self.splitter.addWidget(self.keyTypeList)
 
@@ -83,6 +84,7 @@ class Ui_AddKeyDialog(object):
         AddKeyDialog.setWindowTitle(QCoreApplication.translate("AddKeyDialog", u"Dialog", None))
         self.label.setText(QCoreApplication.translate("AddKeyDialog", u"Key Name:", None))
         self.label_2.setText(QCoreApplication.translate("AddKeyDialog", u"Key Type:", None))
+        self.keyTypeList.setItemText(5, QCoreApplication.translate("AddKeyDialog", u"stream", None))
 
     # retranslateUi
 

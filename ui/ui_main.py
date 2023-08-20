@@ -215,6 +215,26 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_3.addWidget(self.addMemberButton)
 
+        self.maxLabel = QLabel(self.contentTablePage)
+        self.maxLabel.setObjectName(u"maxLabel")
+
+        self.horizontalLayout_3.addWidget(self.maxLabel)
+
+        self.maxLineEdit = QLineEdit(self.contentTablePage)
+        self.maxLineEdit.setObjectName(u"maxLineEdit")
+
+        self.horizontalLayout_3.addWidget(self.maxLineEdit)
+
+        self.minLabel = QLabel(self.contentTablePage)
+        self.minLabel.setObjectName(u"minLabel")
+
+        self.horizontalLayout_3.addWidget(self.minLabel)
+
+        self.minLineEdit = QLineEdit(self.contentTablePage)
+        self.minLineEdit.setObjectName(u"minLineEdit")
+
+        self.horizontalLayout_3.addWidget(self.minLineEdit)
+
         self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         self.horizontalLayout_3.addItem(self.horizontalSpacer)
@@ -258,7 +278,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.stackedContents.setCurrentIndex(0)
+        self.stackedContents.setCurrentIndex(1)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -284,6 +304,10 @@ class Ui_MainWindow(object):
 
         self.sizeLabel.setText(QCoreApplication.translate("MainWindow", u"Size: 0", None))
         self.addMemberButton.setText(QCoreApplication.translate("MainWindow", u"Add member", None))
+        self.maxLabel.setText(QCoreApplication.translate("MainWindow", u"Max", None))
+        self.maxLineEdit.setText(QCoreApplication.translate("MainWindow", u"+", None))
+        self.minLabel.setText(QCoreApplication.translate("MainWindow", u"Min", None))
+        self.minLineEdit.setText(QCoreApplication.translate("MainWindow", u"-", None))
         self.menuConnects.setTitle(QCoreApplication.translate("MainWindow", u"Connects", None))
     # retranslateUi
 
