@@ -5,7 +5,7 @@ import sys
 
 from PySide6.QtCore import QStringListModel, QModelIndex, Qt, QPoint
 from PySide6.QtGui import QStandardItemModel, QAction, QCursor
-from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QMenu
+from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QMenu, QHeaderView
 
 from database import get_connections, get_connection, delete_connection
 from dialog.add_member_dialog import AddMemberDialog
@@ -42,6 +42,8 @@ class MainWindow(QMainWindow):
         self.ui.keyList.doubleClicked.connect(self.key_double_clicked)
         self.ui.keyList.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.ui.keyList.customContextMenuRequested[QPoint].connect(self.key_list_menu)
+        self.ui.contentTable.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.ui.contentTable.customContextMenuRequested[QPoint].connect(self.table_content_list_menu)
         self.ui.addMemberButton.clicked.connect(self.add_member_clicked)
         self.ui.contentTypeList.activated.connect(self.content_type_list_selected)
         self.key_editing_old = None
@@ -180,6 +182,12 @@ class MainWindow(QMainWindow):
         ttl = r.ttl(key)
         print(f"key_click ttl: {ttl}")
         self.ui.ttlShowEditInput.setText(str(ttl))
+
+        model = QStandardItemModel()
+        header = self.ui.contentTable.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.Stretch)
+        self.ui.contentTable.setModel(model)
+
         if key_type == 'string':
             self.ui.stackedContents.setCurrentIndex(0)
             content = r.get(key)
@@ -200,60 +208,44 @@ class MainWindow(QMainWindow):
             self.ui.stackedContents.setCurrentIndex(1)
             lst = r.lrange(key, 0, -1)
             print(f"key_click list value: {lst}")
-            model = QStandardItemModel()
-            model.setHorizontalHeaderLabels(['Index', 'Value', 'Action'])
-            self.ui.contentTable.setModel(model)
+            model.setHorizontalHeaderLabels(['Value'])
             index = 0
             for item in lst:
                 model.insertRow(index)
-                model.setData(model.index(index, 0), index)
-                model.setData(model.index(index, 1), item.decode(errors='ignore'))
-                model.setData(model.index(index, 2), '')
+                model.setData(model.index(index, 0), item.decode(errors='ignore'))
                 index += 1
         elif key_type == 'hash':
             self.ui.stackedContents.setCurrentIndex(1)
             lst = r.hgetall(key)
             print(f"key_click list value: {lst}")
-            model = QStandardItemModel()
-            model.setHorizontalHeaderLabels(['Index', 'Key', 'Value', 'Action'])
-            self.ui.contentTable.setModel(model)
+            model.setHorizontalHeaderLabels(['Key', 'Value'])
             index = 0
             for k, v in lst.items():
                 model.insertRow(index)
-                model.setData(model.index(index, 0), index)
-                model.setData(model.index(index, 1), k.decode(errors='ignore'))
-                model.setData(model.index(index, 2), v.decode(errors='ignore'))
-                model.setData(model.index(index, 3), '')
+                model.setData(model.index(index, 0), k.decode(errors='ignore'))
+                model.setData(model.index(index, 1), v.decode(errors='ignore'))
                 index += 1
         elif key_type == 'set':
             self.ui.stackedContents.setCurrentIndex(1)
             lst = r.smembers(key)
             print(f"key_click list value: {lst}")
-            model = QStandardItemModel()
-            model.setHorizontalHeaderLabels(['Index', 'Value', 'Action'])
-            self.ui.contentTable.setModel(model)
+            model.setHorizontalHeaderLabels(['Value'])
             index = 0
             for item in lst:
                 model.insertRow(index)
-                model.setData(model.index(index, 0), index)
-                model.setData(model.index(index, 1), item.decode(errors='ignore'))
-                model.setData(model.index(index, 2), '')
+                model.setData(model.index(index, 0), item.decode(errors='ignore'))
                 index += 1
         elif key_type == 'zset':
             self.ui.stackedContents.setCurrentIndex(1)
             lst = r.zrange(key, 0, -1, withscores=True)
             print(f"key_click list value: {lst}")
-            model = QStandardItemModel()
-            model.setHorizontalHeaderLabels(['Index', 'Score', 'Member', 'Action'])
-            self.ui.contentTable.setModel(model)
+            model.setHorizontalHeaderLabels(['Score', 'Member'])
             index = 0
             for item in lst:
                 member, score = item
                 model.insertRow(index)
-                model.setData(model.index(index, 0), index)
-                model.setData(model.index(index, 1), score)
-                model.setData(model.index(index, 2), member.decode(errors='ignore'))
-                model.setData(model.index(index, 3), '')
+                model.setData(model.index(index, 0), score)
+                model.setData(model.index(index, 1), member.decode(errors='ignore'))
                 index += 1
 
     def save_content_clicked(self):
@@ -310,6 +302,46 @@ class MainWindow(QMainWindow):
 
     def content_type_list_selected(self):
         self.refresh_content_clicked()
+
+    def table_content_list_menu(self, point):
+        print(f"table_content_list_menu: {point}")
+        popMenu = QMenu()
+        popMenu.addAction(QAction(u'copy', self, triggered=self.table_content_copy))
+        popMenu.addAction(QAction(u'delete', self, triggered=self.table_content_delete))
+        popMenu.exec(QCursor.pos())
+
+    def table_content_copy(self):
+        current_index = self.ui.contentTable.currentIndex()
+        current_data = self.ui.contentTable.model().data(current_index)
+        print(f"table_content_copy current index: {current_index}, current data: {current_data}")
+        cb = app.clipboard()
+        cb.setText(current_data)
+
+    def table_content_delete(self):
+        current_index: QModelIndex = self.ui.contentTable.currentIndex()
+        current_data = self.ui.contentTable.model().data(current_index)
+        print(f"table_content_delete current index: {current_index.row()}, current data: {current_data}")
+        r = self.connected_redis
+        redis_key = self.shown_redis_key
+        if not r or not redis_key:
+            return
+        key = redis_key['key']
+        key_type = redis_key['type']
+        if key_type == 'list':
+            r.lrem(key, current_index.row(), r.lindex(key, current_index.row()))
+        elif key_type == 'hash':
+            field_index = self.ui.contentTable.model().index(current_index.row(), 0)
+            field = self.ui.contentTable.model().data(field_index)
+            print(f"field: {field}")
+            r.hdel(key, field)
+        elif key_type == 'set':
+            r.srem(key, current_data)
+        elif key_type == 'zset':
+            member_index = self.ui.contentTable.model().index(current_index.row(), 1)
+            member = self.ui.contentTable.model().data(member_index)
+            print(f"member: {member}")
+            r.zrem(key, member)
+        self._update_content(r, key, key_type)
 
 
 if __name__ == "__main__":

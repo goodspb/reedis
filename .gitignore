@@ -475,3 +475,7 @@ GitHub.sublime-settings
 # Reedis
 reedis.db
 Reedis.pyproject.user
+
+# nuitka
+/*.build
+/*.dist

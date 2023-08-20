@@ -243,7 +243,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 846, 24))
+        self.menubar.setGeometry(QRect(0, 0, 846, 36))
         self.menubar.setDefaultUp(True)
         self.menuConnects = QMenu(self.menubar)
         self.menuConnects.setObjectName(u"menuConnects")
