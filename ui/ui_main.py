@@ -247,6 +247,7 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.contentTable.sizePolicy().hasHeightForWidth())
         self.contentTable.setSizePolicy(sizePolicy)
         self.contentTable.setSizeAdjustPolicy(QAbstractScrollArea.AdjustIgnored)
+        self.contentTable.setEditTriggers(QAbstractItemView.DoubleClicked)
         self.contentTable.horizontalHeader().setCascadingSectionResizes(True)
 
         self.verticalLayout_6.addWidget(self.contentTable)

@@ -66,6 +66,13 @@ class AddMemberDialog(QDialog):
         elif self.key_type == 'stream':
             try:
                 fields = json.loads(value)
+                if type(fields) is list:
+                    new_fields = {}
+                    index = 0
+                    for v in fields:
+                        new_fields[f"{index}"] = str(v)
+                        index += 1
+                    fields = new_fields
             except Exception as e:
                 QMessageBox.warning(self, 'Error', 'Value must be Json Object.', QMessageBox.StandardButton.Ok)
                 return

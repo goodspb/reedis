@@ -44,6 +44,7 @@ class MainWindow(QMainWindow):
         self.ui.keyList.customContextMenuRequested[QPoint].connect(self.key_list_menu)
         self.ui.contentTable.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.ui.contentTable.customContextMenuRequested[QPoint].connect(self.table_content_list_menu)
+        self.ui.contentTable.doubleClicked.connect(self.table_content_double_clicked)
         self.ui.addMemberButton.clicked.connect(self.add_member_clicked)
         self.ui.contentTypeList.activated.connect(self.content_type_list_selected)
         self.ui.maxLabel.hide()
@@ -53,6 +54,7 @@ class MainWindow(QMainWindow):
         self.ui.maxLineEdit.returnPressed.connect(self.stream_min_or_max_press)
         self.ui.minLineEdit.returnPressed.connect(self.stream_min_or_max_press)
         self.key_editing_old = None
+        self.table_content_editing_old = None
         self.connected_redis = None
         self.shown_redis_key = None
 
@@ -144,7 +146,7 @@ class MainWindow(QMainWindow):
         r = self.connected_redis
         key_type = r.type(k)
         print(f"key_click type: {key_type}")
-        key_type_str = key_type
+        key_type_str = key_type.decode('utf-8', errors='ignore')
         self.ui.typeShowInput.setText(key_type_str)
         self.shown_redis_key = {
             "key": k,
@@ -197,12 +199,13 @@ class MainWindow(QMainWindow):
         model = QStandardItemModel()
         header = self.ui.contentTable.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.Stretch)
+        model.dataChanged.connect(self.table_content_edit)
         self.ui.contentTable.setModel(model)
 
         if key_type == 'string':
             self.ui.stackedContents.setCurrentIndex(0)
             content = r.get(key)
-            content_str = content
+            content_str = content.decode('utf-8', errors='ignore')
             print(f"key_click string value {content_str}, size: {len(content_str)}")
             self.ui.sizeLabel.setText(f"Size: {len(content_str)}")
             content_type = self.ui.contentTypeList.currentText()
@@ -223,7 +226,7 @@ class MainWindow(QMainWindow):
             index = 0
             for item in lst:
                 model.insertRow(index)
-                model.setData(model.index(index, 0), item)
+                model.setData(model.index(index, 0), item.decode('utf-8', errors='ignore'))
                 index += 1
         elif key_type == 'hash':
             self.ui.stackedContents.setCurrentIndex(1)
@@ -233,8 +236,8 @@ class MainWindow(QMainWindow):
             index = 0
             for k, v in lst.items():
                 model.insertRow(index)
-                model.setData(model.index(index, 0), k)
-                model.setData(model.index(index, 1), v)
+                model.setData(model.index(index, 0), k.decode('utf-8', errors='ignore'))
+                model.setData(model.index(index, 1), v.decode('utf-8', errors='ignore'))
                 index += 1
         elif key_type == 'set':
             self.ui.stackedContents.setCurrentIndex(1)
@@ -244,7 +247,7 @@ class MainWindow(QMainWindow):
             index = 0
             for item in lst:
                 model.insertRow(index)
-                model.setData(model.index(index, 0), item)
+                model.setData(model.index(index, 0), item.decode('utf-8', errors='ignore'))
                 index += 1
         elif key_type == 'zset':
             self.ui.stackedContents.setCurrentIndex(1)
@@ -255,8 +258,8 @@ class MainWindow(QMainWindow):
             for item in lst:
                 member, score = item
                 model.insertRow(index)
-                model.setData(model.index(index, 0), score)
-                model.setData(model.index(index, 1), member)
+                model.setData(model.index(index, 0), member.decode('utf-8', errors='ignore'))
+                model.setData(model.index(index, 1), score)
                 index += 1
         elif key_type == 'stream':
             self.ui.maxLabel.show()
@@ -270,9 +273,16 @@ class MainWindow(QMainWindow):
             index = 0
             for item in lst:
                 stream_id, stream_value = item
+                print(f"stream_id: {stream_id}, stream_value: {stream_value}")
+                stream_value_dict_str = {k.decode('utf-8', errors='ignore'): v.decode('utf-8', errors='ignore')
+                                         for k, v in stream_value.items()}
                 model.insertRow(index)
-                model.setData(model.index(index, 0), stream_id)
-                model.setData(model.index(index, 1), json.dumps(stream_value))
+                model.setData(model.index(index, 0), stream_id.decode('utf-8', errors='ignore'))
+                model_item = model.item(index, 0)
+                model_item.setFlags(model_item.flags() & ~Qt.ItemIsEditable)
+                model.setData(model.index(index, 1), json.dumps(stream_value_dict_str))
+                model_item2 = model.item(index, 1)
+                model_item2.setFlags(model_item2.flags() & ~Qt.ItemIsEditable)
                 index += 1
 
     def save_content_clicked(self):
@@ -364,7 +374,7 @@ class MainWindow(QMainWindow):
         elif key_type == 'set':
             r.srem(key, current_data)
         elif key_type == 'zset':
-            member_index = self.ui.contentTable.model().index(current_index.row(), 1)
+            member_index = self.ui.contentTable.model().index(current_index.row(), 0)
             member = self.ui.contentTable.model().data(member_index)
             print(f"member: {member}")
             r.zrem(key, member)
@@ -377,6 +387,66 @@ class MainWindow(QMainWindow):
 
     def stream_min_or_max_press(self):
         self.refresh_content_clicked()
+
+    def table_content_double_clicked(self, index: QModelIndex):
+        print(f"table_content_double_clicked, row:{index.row()}, column: {index.column()}, data:{index.data()}")
+        model = self.ui.contentTable.model()
+        column_list = []
+        for column in range(self.ui.contentTable.model().columnCount()):
+            column_index = model.index(index.row(), column)
+            column_list.append(model.data(column_index))
+        self.table_content_editing_old = column_list
+        print(f"table_content_editing_old: {self.table_content_editing_old}")
+
+    def table_content_edit(self, index: QModelIndex):
+        print(f"key_edited, row:{index.row()}, column: {index.column()}, data:{index.data()}")
+        if self.table_content_editing_old is None:
+            return
+        r = self.connected_redis
+        redis_key = self.shown_redis_key
+        if not r or not redis_key:
+            return
+        key = redis_key['key']
+        key_type = redis_key['type']
+        model = self.ui.contentTable.model()
+        if key_type == 'list':
+            r.lset(key, index.row(), index.data())
+        elif key_type == 'hash':
+            field_index = model.index(index.row(), 0)
+            field = model.data(field_index)
+            value_index = model.index(index.row(), 1)
+            value = model.data(value_index)
+            print(f"field: {field}, value: {value}")
+            # change field
+            if index.column() == 0:
+                # add new field
+                r.hset(key, field, self.table_content_editing_old[1])
+                # delete old field
+                r.hdel(key, self.table_content_editing_old[0])
+            # change value
+            else:
+                r.hset(key, field, value)
+        elif key_type == 'set':
+            # add new set
+            r.sadd(key, index.data())
+            # delete old set
+            r.srem(key, self.table_content_editing_old[0])
+        elif key_type == 'zset':
+            member_index = model.index(index.row(), 0)
+            member = model.data(member_index)
+            score_index = model.index(index.row(), 1)
+            score = model.data(score_index)
+            print(f"member: {member}, score: {score}")
+            # change member
+            if index.column() == 0:
+                # add new member
+                r.zadd(key, {member: self.table_content_editing_old[1]})
+                # delete old member
+                r.zrem(key, self.table_content_editing_old[0])
+            # change score
+            else:
+                r.zadd(key, {member: score})
+        self.table_content_editing_old = None
 
 
 if __name__ == "__main__":
