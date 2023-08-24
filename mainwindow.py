@@ -33,18 +33,33 @@ class MainWindow(QMainWindow):
         self.ui.deleteButton.clicked.connect(self.delete_button_clicked)
         self.ui.saveContentButton.clicked.connect(self.save_content_clicked)
         self.ui.refreshContentButton.clicked.connect(self.refresh_content_clicked)
+        self.ui.loadMoreKeyButton.clicked.connect(self.load_more_key_clicked)
+        self.ui.loadMoreContentButton.clicked.connect(self.load_more_content_clicked)
         self.ui.addKeyButton.clicked.connect(self.add_or_edit_key_clicked)
         self.ui.refreshKeysButton.clicked.connect(self.refresh_key_clicked)
         self.refresh_connections()
-        self.ui.searchInput.returnPressed.connect(self._search_input_key)
         self.ui.dbList.activated.connect(self.db_list_selected)
+        self.ui.searchInput.returnPressed.connect(self._search_input_key)
+
         self.ui.keyList.clicked.connect(self.key_click)
         self.ui.keyList.doubleClicked.connect(self.key_double_clicked)
         self.ui.keyList.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.ui.keyList.customContextMenuRequested[QPoint].connect(self.key_list_menu)
+        key_list_model = QStringListModel()
+        key_list_model.dataChanged.connect(self.key_edited)
+        self.ui.keyList.setModel(key_list_model)
+        self.key_list_cursor = 0
+
         self.ui.contentTable.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.ui.contentTable.customContextMenuRequested[QPoint].connect(self.table_content_list_menu)
         self.ui.contentTable.doubleClicked.connect(self.table_content_double_clicked)
+        content_table_model = QStandardItemModel()
+        content_table_header = self.ui.contentTable.horizontalHeader()
+        content_table_header.setSectionResizeMode(QHeaderView.Stretch)
+        content_table_model.dataChanged.connect(self.table_content_edit)
+        self.ui.contentTable.setModel(content_table_model)
+        self.current_cursor=0
+
         self.ui.addMemberButton.clicked.connect(self.add_member_clicked)
         self.ui.contentTypeList.activated.connect(self.content_type_list_selected)
         self.ui.maxLabel.hide()
@@ -53,6 +68,9 @@ class MainWindow(QMainWindow):
         self.ui.minLineEdit.hide()
         self.ui.maxLineEdit.returnPressed.connect(self.stream_min_or_max_press)
         self.ui.minLineEdit.returnPressed.connect(self.stream_min_or_max_press)
+        self.ui.scanSearchLineEdit.hide()
+        self.ui.scanSearchLineEdit.returnPressed.connect(self.refresh_content_clicked)
+
         self.key_editing_old = None
         self.table_content_editing_old = None
         self.connected_redis = None
@@ -122,21 +140,32 @@ class MainWindow(QMainWindow):
         r.select(index)
         self._search_input_key()
 
-    def _search_input_key(self):
+    def _search_input_key(self, from_start=True):
         if not self.connected_redis:
             return
+        model = self.ui.keyList.model()
+        if from_start:
+            # remove all rows
+            model.removeRows(0, model.rowCount())
+            self.key_list_cursor = 0
+            self.ui.loadMoreKeyButton.setDisabled(False)
         r = self.connected_redis
         search_input = self.ui.searchInput.text()
-        print(f"search_input: {search_input}")
-        keys = get_keys(r, f"*{search_input}*" if search_input else None)
-        model = QStringListModel()
-        index = 0
+        print(f"_search_input_key, key_list_cursor:{self.key_list_cursor} search_input: {search_input}")
+        if self.key_list_cursor == -1:
+            return
+        new_cursor, keys = get_keys(r, self.key_list_cursor, f"*{search_input}*" if search_input else "*", 100)
+        if new_cursor == 0:
+            print(f"_search_input_key, end of the list")
+            self.key_list_cursor = -1
+            self.ui.loadMoreKeyButton.setDisabled(True)
+        else:
+            self.key_list_cursor = new_cursor
+        index = model.rowCount()
         for key in keys:
             model.insertRow(index)
             model.setData(model.index(index), key)
             index += 1
-        model.dataChanged.connect(self.key_edited)
-        self.ui.keyList.setModel(model)
 
     def key_click(self, index):
         if not self.connected_redis:
@@ -186,22 +215,27 @@ class MainWindow(QMainWindow):
         r.delete(current_data)
         self._search_input_key()
 
-    def _update_content(self, r, key, key_type):
+    def _update_content(self, r, key, key_type, from_start=True):
         self.ui.maxLabel.hide()
         self.ui.maxLineEdit.hide()
         self.ui.minLabel.hide()
         self.ui.minLineEdit.hide()
+        self.ui.scanSearchLineEdit.hide()
 
         ttl = r.ttl(key)
         print(f"key_click ttl: {ttl}")
         self.ui.ttlShowEditInput.setText(str(ttl))
 
-        model = QStandardItemModel()
-        header = self.ui.contentTable.horizontalHeader()
-        header.setSectionResizeMode(QHeaderView.Stretch)
-        model.dataChanged.connect(self.table_content_edit)
-        self.ui.contentTable.setModel(model)
-
+        count = 100
+        model = self.ui.contentTable.model()
+        scan_search_keyword = self.ui.scanSearchLineEdit.text()
+        scan_search_keyword = f"*{scan_search_keyword}*" if scan_search_keyword else "*"
+        if from_start:
+            # remove all rows
+            model.removeRows(0, model.rowCount())
+            model.removeColumns(0, model.columnCount())
+            self.ui.loadMoreContentButton.setDisabled(False)
+            self.current_cursor = 0
         if key_type == 'string':
             self.ui.stackedContents.setCurrentIndex(0)
             content = r.get(key)
@@ -220,53 +254,83 @@ class MainWindow(QMainWindow):
             self.ui.contentStrEdit.setText(content_str)
         elif key_type == 'list':
             self.ui.stackedContents.setCurrentIndex(1)
-            lst = r.lrange(key, 0, -1)
-            print(f"key_click list value: {lst}")
-            model.setHorizontalHeaderLabels(['Value'])
-            index = 0
-            for item in lst:
-                model.insertRow(index)
-                model.setData(model.index(index, 0), item.decode('utf-8', errors='ignore'))
-                index += 1
+            if self.current_cursor != -1:
+                lst = r.lrange(key, self.current_cursor, self.current_cursor + count - 1)
+                if len(lst) == count:
+                    self.current_cursor += count
+                else:
+                    self.ui.loadMoreContentButton.setDisabled(True)
+                    self.current_cursor = -1
+                print(f"key_click, redis_list_index: {self.current_cursor}, list value: {lst}")
+                model.setHorizontalHeaderLabels(['Value'])
+                index = model.rowCount()
+                for item in lst:
+                    model.insertRow(index)
+                    model.setData(model.index(index, 0), item.decode('utf-8', errors='ignore'))
+                    index += 1
         elif key_type == 'hash':
+            self.ui.scanSearchLineEdit.show()
             self.ui.stackedContents.setCurrentIndex(1)
-            lst = r.hgetall(key)
-            print(f"key_click hash value: {lst}")
-            model.setHorizontalHeaderLabels(['Key', 'Value'])
-            index = 0
-            for k, v in lst.items():
-                model.insertRow(index)
-                model.setData(model.index(index, 0), k.decode('utf-8', errors='ignore'))
-                model.setData(model.index(index, 1), v.decode('utf-8', errors='ignore'))
-                index += 1
+            if self.current_cursor != -1:
+                cursor, lst = r.hscan(key, self.current_cursor, scan_search_keyword, count)
+                print(f"key_click hash value: {lst}, cursor: {cursor}")
+                if cursor == 0:
+                    self.current_cursor = -1
+                    self.ui.loadMoreContentButton.setDisabled(True)
+                else:
+                    self.current_cursor = cursor
+                model.setHorizontalHeaderLabels(['Key', 'Value'])
+                index = model.rowCount()
+                for k, v in lst.items():
+                    model.insertRow(index)
+                    model.setData(model.index(index, 0), k.decode('utf-8', errors='ignore'))
+                    model.setData(model.index(index, 1), v.decode('utf-8', errors='ignore'))
+                    index += 1
         elif key_type == 'set':
+            self.ui.scanSearchLineEdit.show()
             self.ui.stackedContents.setCurrentIndex(1)
-            lst = r.smembers(key)
-            print(f"key_click set value: {lst}")
-            model.setHorizontalHeaderLabels(['Value'])
-            index = 0
-            for item in lst:
-                model.insertRow(index)
-                model.setData(model.index(index, 0), item.decode('utf-8', errors='ignore'))
-                index += 1
+            if self.current_cursor != -1:
+                cursor, lst = r.sscan(key, self.current_cursor, scan_search_keyword, count)
+                print(f"key_click set value: {lst}, cursor: {cursor}")
+                if cursor == 0:
+                    self.current_cursor = -1
+                    self.ui.loadMoreContentButton.setDisabled(True)
+                else:
+                    self.current_cursor = cursor
+                model.setHorizontalHeaderLabels(['Value'])
+                index = model.rowCount()
+                for item in lst:
+                    model.insertRow(index)
+                    model.setData(model.index(index, 0), item.decode('utf-8', errors='ignore'))
+                    index += 1
         elif key_type == 'zset':
+            self.ui.scanSearchLineEdit.show()
             self.ui.stackedContents.setCurrentIndex(1)
-            lst = r.zrange(key, 0, -1, withscores=True)
-            print(f"key_click zset value: {lst}")
-            model.setHorizontalHeaderLabels(['Score', 'Member'])
-            index = 0
-            for item in lst:
-                member, score = item
-                model.insertRow(index)
-                model.setData(model.index(index, 0), member.decode('utf-8', errors='ignore'))
-                model.setData(model.index(index, 1), score)
-                index += 1
+            print(f"current_cursor: {self.current_cursor}, count:{count}")
+            if self.current_cursor != -1:
+                cursor, lst = r.zscan(key, self.current_cursor, scan_search_keyword, count)
+                print(f"key_click zset value: {lst}, cursor: {cursor}")
+                if cursor == 0:
+                    self.current_cursor = -1
+                    self.ui.loadMoreContentButton.setDisabled(True)
+                else:
+                    self.current_cursor = cursor
+                model.setHorizontalHeaderLabels(['Score', 'Member'])
+                index = model.rowCount()
+                for item in lst:
+                    member, score = item
+                    model.insertRow(index)
+                    model.setData(model.index(index, 0), member.decode('utf-8', errors='ignore'))
+                    model.setData(model.index(index, 1), score)
+                    index += 1
         elif key_type == 'stream':
             self.ui.maxLabel.show()
             self.ui.maxLineEdit.show()
             self.ui.minLabel.show()
             self.ui.minLineEdit.show()
             self.ui.stackedContents.setCurrentIndex(1)
+            # stream does not support pagination
+            self.ui.loadMoreContentButton.setDisabled(True)
             lst = r.xrange(key, self.ui.minLineEdit.text(), self.ui.maxLineEdit.text())
             print(f"key_click stream value: {lst}")
             model.setHorizontalHeaderLabels(['ID', 'Value'])
@@ -284,6 +348,13 @@ class MainWindow(QMainWindow):
                 model_item2 = model.item(index, 1)
                 model_item2.setFlags(model_item2.flags() & ~Qt.ItemIsEditable)
                 index += 1
+
+    def load_more_content_clicked(self):
+        r = self.connected_redis
+        redis_key = self.shown_redis_key
+        if not r or not redis_key:
+            return
+        self._update_content(r, redis_key['key'], redis_key['type'], False)
 
     def save_content_clicked(self):
         r = self.connected_redis
@@ -318,6 +389,9 @@ class MainWindow(QMainWindow):
         if not r or not redis_key:
             return
         self._update_content(r, redis_key['key'], redis_key['type'])
+
+    def load_more_key_clicked(self):
+        self._search_input_key(from_start=False)
 
     def add_or_edit_key_clicked(self):
         if not self.connected_redis:

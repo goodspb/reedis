@@ -139,6 +139,11 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_7.addWidget(self.keyList)
 
+        self.loadMoreKeyButton = QPushButton(self.centralwidget)
+        self.loadMoreKeyButton.setObjectName(u"loadMoreKeyButton")
+
+        self.verticalLayout_7.addWidget(self.loadMoreKeyButton)
+
         self.horizontalLayout_6 = QHBoxLayout()
         self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
         self.addKeyButton = QPushButton(self.centralwidget)
@@ -235,6 +240,11 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_3.addWidget(self.minLineEdit)
 
+        self.scanSearchLineEdit = QLineEdit(self.contentTablePage)
+        self.scanSearchLineEdit.setObjectName(u"scanSearchLineEdit")
+
+        self.horizontalLayout_3.addWidget(self.scanSearchLineEdit)
+
         self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         self.horizontalLayout_3.addItem(self.horizontalSpacer)
@@ -249,8 +259,14 @@ class Ui_MainWindow(object):
         self.contentTable.setSizeAdjustPolicy(QAbstractScrollArea.AdjustIgnored)
         self.contentTable.setEditTriggers(QAbstractItemView.DoubleClicked)
         self.contentTable.horizontalHeader().setCascadingSectionResizes(True)
+        self.contentTable.horizontalHeader().setDefaultSectionSize(100)
 
         self.verticalLayout_6.addWidget(self.contentTable)
+
+        self.loadMoreContentButton = QPushButton(self.contentTablePage)
+        self.loadMoreContentButton.setObjectName(u"loadMoreContentButton")
+
+        self.verticalLayout_6.addWidget(self.loadMoreContentButton)
 
         self.stackedContents.addWidget(self.contentTablePage)
 
@@ -264,7 +280,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 846, 36))
+        self.menubar.setGeometry(QRect(0, 0, 846, 24))
         self.menubar.setDefaultUp(True)
         self.menuConnects = QMenu(self.menubar)
         self.menuConnects.setObjectName(u"menuConnects")
@@ -300,6 +316,7 @@ class Ui_MainWindow(object):
         self.ttlShowEditInput.setPlaceholderText("")
         self.saveContentButton.setText(QCoreApplication.translate("MainWindow", u"Save", None))
         self.refreshContentButton.setText(QCoreApplication.translate("MainWindow", u"Refresh", None))
+        self.loadMoreKeyButton.setText(QCoreApplication.translate("MainWindow", u"Load More", None))
         self.addKeyButton.setText(QCoreApplication.translate("MainWindow", u"Add Key", None))
         self.refreshKeysButton.setText(QCoreApplication.translate("MainWindow", u"Refresh Keys", None))
 
@@ -309,6 +326,9 @@ class Ui_MainWindow(object):
         self.maxLineEdit.setText(QCoreApplication.translate("MainWindow", u"+", None))
         self.minLabel.setText(QCoreApplication.translate("MainWindow", u"Min", None))
         self.minLineEdit.setText(QCoreApplication.translate("MainWindow", u"-", None))
+        self.scanSearchLineEdit.setText("")
+        self.scanSearchLineEdit.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Enter to Search", None))
+        self.loadMoreContentButton.setText(QCoreApplication.translate("MainWindow", u"Load More", None))
         self.menuConnects.setTitle(QCoreApplication.translate("MainWindow", u"Connects", None))
     # retranslateUi
 

@@ -133,6 +133,13 @@
          </widget>
         </item>
         <item>
+         <widget class="QPushButton" name="loadMoreKeyButton">
+          <property name="text">
+           <string>Load More</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_6">
           <item>
            <widget class="QPushButton" name="addKeyButton">
@@ -269,6 +276,16 @@
              </widget>
             </item>
             <item>
+             <widget class="QLineEdit" name="scanSearchLineEdit">
+              <property name="text">
+               <string/>
+              </property>
+              <property name="placeholderText">
+               <string>Enter to Search</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <spacer name="horizontalSpacer">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -300,6 +317,16 @@
             <attribute name="horizontalHeaderCascadingSectionResizes">
              <bool>true</bool>
             </attribute>
+            <attribute name="horizontalHeaderDefaultSectionSize">
+             <number>100</number>
+            </attribute>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="loadMoreContentButton">
+            <property name="text">
+             <string>Load More</string>
+            </property>
            </widget>
           </item>
          </layout>
@@ -316,7 +343,7 @@
      <x>0</x>
      <y>0</y>
      <width>846</width>
-     <height>36</height>
+     <height>24</height>
     </rect>
    </property>
    <property name="defaultUp">

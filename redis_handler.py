@@ -57,9 +57,8 @@ def get_dbs(r):
     return int(db_count)
 
 
-def get_keys(r, match_text = None):
-    keys = r.scan_iter(match=match_text)
-    key_list = []
-    for key in keys:
-        key_list.append(key.decode('utf-8'))
-    return key_list
+def get_keys(r, cursor=0, match_text="*", count=100):
+    match_text = "*" if not match_text else match_text
+    new_cursor, keys = r.scan(cursor=cursor, match=match_text, count=count)
+    print(f"get_keys: {new_cursor}, keys:{keys}")
+    return new_cursor, [key.decode('utf-8', errors='ignore') for key in keys]
