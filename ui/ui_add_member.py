@@ -16,76 +16,93 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QDialog, QDialogButtonBox,
-    QHBoxLayout, QLabel, QLineEdit, QSizePolicy,
-    QTextEdit, QVBoxLayout, QWidget)
+    QGridLayout, QHBoxLayout, QLabel, QLineEdit,
+    QSizePolicy, QTextEdit, QWidget)
 
 class Ui_AddMemberDialog(object):
     def setupUi(self, AddMemberDialog):
         if not AddMemberDialog.objectName():
             AddMemberDialog.setObjectName(u"AddMemberDialog")
-        AddMemberDialog.resize(413, 352)
-        self.verticalLayout = QVBoxLayout(AddMemberDialog)
-        self.verticalLayout.setObjectName(u"verticalLayout")
-        self.FieldLayout = QHBoxLayout()
-        self.FieldLayout.setObjectName(u"FieldLayout")
+        AddMemberDialog.resize(423, 400)
+        self.gridLayout = QGridLayout(AddMemberDialog)
+        self.gridLayout.setObjectName(u"gridLayout")
+        self.fieldLayout = QHBoxLayout()
+        self.fieldLayout.setObjectName(u"fieldLayout")
         self.label = QLabel(AddMemberDialog)
         self.label.setObjectName(u"label")
+        self.label.setMinimumSize(QSize(0, 0))
+        self.label.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignVCenter)
 
-        self.FieldLayout.addWidget(self.label)
+        self.fieldLayout.addWidget(self.label)
 
         self.FieldInput = QLineEdit(AddMemberDialog)
         self.FieldInput.setObjectName(u"FieldInput")
 
-        self.FieldLayout.addWidget(self.FieldInput)
+        self.fieldLayout.addWidget(self.FieldInput)
 
+        self.fieldLayout.setStretch(0, 1)
+        self.fieldLayout.setStretch(1, 5)
 
-        self.verticalLayout.addLayout(self.FieldLayout)
+        self.gridLayout.addLayout(self.fieldLayout, 0, 0, 1, 1)
 
-        self.ScoreLayout = QHBoxLayout()
-        self.ScoreLayout.setObjectName(u"ScoreLayout")
+        self.scoreLayout = QHBoxLayout()
+        self.scoreLayout.setObjectName(u"scoreLayout")
         self.label_2 = QLabel(AddMemberDialog)
         self.label_2.setObjectName(u"label_2")
+        self.label_2.setMinimumSize(QSize(0, 0))
+        self.label_2.setLayoutDirection(Qt.LeftToRight)
+        self.label_2.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignVCenter)
 
-        self.ScoreLayout.addWidget(self.label_2)
+        self.scoreLayout.addWidget(self.label_2)
 
         self.ScoreInput = QLineEdit(AddMemberDialog)
         self.ScoreInput.setObjectName(u"ScoreInput")
 
-        self.ScoreLayout.addWidget(self.ScoreInput)
+        self.scoreLayout.addWidget(self.ScoreInput)
 
+        self.scoreLayout.setStretch(0, 1)
+        self.scoreLayout.setStretch(1, 5)
 
-        self.verticalLayout.addLayout(self.ScoreLayout)
+        self.gridLayout.addLayout(self.scoreLayout, 1, 0, 1, 1)
 
-        self.IdLayout = QHBoxLayout()
-        self.IdLayout.setObjectName(u"IdLayout")
+        self.idLayout = QHBoxLayout()
+        self.idLayout.setObjectName(u"idLayout")
         self.label_4 = QLabel(AddMemberDialog)
         self.label_4.setObjectName(u"label_4")
+        self.label_4.setMinimumSize(QSize(0, 0))
+        self.label_4.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignVCenter)
+        self.label_4.setWordWrap(False)
 
-        self.IdLayout.addWidget(self.label_4)
+        self.idLayout.addWidget(self.label_4)
 
         self.IdInput = QLineEdit(AddMemberDialog)
         self.IdInput.setObjectName(u"IdInput")
 
-        self.IdLayout.addWidget(self.IdInput)
+        self.idLayout.addWidget(self.IdInput)
 
+        self.idLayout.setStretch(0, 1)
+        self.idLayout.setStretch(1, 5)
 
-        self.verticalLayout.addLayout(self.IdLayout)
+        self.gridLayout.addLayout(self.idLayout, 2, 0, 1, 1)
 
-        self.ValueLayout = QHBoxLayout()
-        self.ValueLayout.setObjectName(u"ValueLayout")
+        self.valueLayout = QHBoxLayout()
+        self.valueLayout.setObjectName(u"valueLayout")
         self.label_3 = QLabel(AddMemberDialog)
         self.label_3.setObjectName(u"label_3")
+        self.label_3.setMinimumSize(QSize(0, 0))
         self.label_3.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignTop)
 
-        self.ValueLayout.addWidget(self.label_3)
+        self.valueLayout.addWidget(self.label_3)
 
         self.ValueTextEdit = QTextEdit(AddMemberDialog)
         self.ValueTextEdit.setObjectName(u"ValueTextEdit")
 
-        self.ValueLayout.addWidget(self.ValueTextEdit)
+        self.valueLayout.addWidget(self.ValueTextEdit)
 
+        self.valueLayout.setStretch(0, 1)
+        self.valueLayout.setStretch(1, 5)
 
-        self.verticalLayout.addLayout(self.ValueLayout)
+        self.gridLayout.addLayout(self.valueLayout, 3, 0, 1, 1)
 
         self.buttonBox = QDialogButtonBox(AddMemberDialog)
         self.buttonBox.setObjectName(u"buttonBox")
@@ -93,7 +110,7 @@ class Ui_AddMemberDialog(object):
         self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Ok)
         self.buttonBox.setCenterButtons(True)
 
-        self.verticalLayout.addWidget(self.buttonBox)
+        self.gridLayout.addWidget(self.buttonBox, 4, 0, 1, 1)
 
 
         self.retranslateUi(AddMemberDialog)
@@ -104,7 +121,7 @@ class Ui_AddMemberDialog(object):
     # setupUi
 
     def retranslateUi(self, AddMemberDialog):
-        AddMemberDialog.setWindowTitle(QCoreApplication.translate("AddMemberDialog", u"Dialog", None))
+        AddMemberDialog.setWindowTitle(QCoreApplication.translate("AddMemberDialog", u"Add Member", None))
         self.label.setText(QCoreApplication.translate("AddMemberDialog", u"Field: ", None))
         self.label_2.setText(QCoreApplication.translate("AddMemberDialog", u"Score: ", None))
         self.label_4.setText(QCoreApplication.translate("AddMemberDialog", u"ID:", None))

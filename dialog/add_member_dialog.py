@@ -39,16 +39,16 @@ class AddMemberDialog(QDialog):
             self._hide_score_layout()
 
     def _hide_field_layout(self):
-        for i in range(self.ui.FieldLayout.count()):
-            self.ui.FieldLayout.itemAt(i).widget().hide()
+        for i in range(self.ui.fieldLayout.count()):
+            self.ui.fieldLayout.itemAt(i).widget().hide()
 
     def _hide_score_layout(self):
-        for i in range(self.ui.ScoreLayout.count()):
-            self.ui.ScoreLayout.itemAt(i).widget().hide()
+        for i in range(self.ui.scoreLayout.count()):
+            self.ui.scoreLayout.itemAt(i).widget().hide()
 
     def _hide_id_layout(self):
-        for i in range(self.ui.IdLayout.count()):
-            self.ui.IdLayout.itemAt(i).widget().hide()
+        for i in range(self.ui.idLayout.count()):
+            self.ui.idLayout.itemAt(i).widget().hide()
 
     def save_member_clicked(self):
         field = self.ui.FieldInput.text()

@@ -30,8 +30,8 @@ class Ui_MainWindow(object):
         MainWindow.resize(846, 604)
         self.actionAdd = QAction(MainWindow)
         self.actionAdd.setObjectName(u"actionAdd")
-        self.actionAll_Connects = QAction(MainWindow)
-        self.actionAll_Connects.setObjectName(u"actionAll_Connects")
+        self.actionContact = QAction(MainWindow)
+        self.actionContact.setObjectName(u"actionContact")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout = QVBoxLayout(self.centralwidget)
@@ -284,14 +284,17 @@ class Ui_MainWindow(object):
         self.menubar.setDefaultUp(True)
         self.menuConnects = QMenu(self.menubar)
         self.menuConnects.setObjectName(u"menuConnects")
+        self.menuHelp = QMenu(self.menubar)
+        self.menuHelp.setObjectName(u"menuHelp")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
         self.menubar.addAction(self.menuConnects.menuAction())
+        self.menubar.addAction(self.menuHelp.menuAction())
         self.menuConnects.addAction(self.actionAdd)
-        self.menuConnects.addAction(self.actionAll_Connects)
+        self.menuHelp.addAction(self.actionContact)
 
         self.retranslateUi(MainWindow)
 
@@ -304,7 +307,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Reedis", None))
         self.actionAdd.setText(QCoreApplication.translate("MainWindow", u"Add", None))
-        self.actionAll_Connects.setText(QCoreApplication.translate("MainWindow", u"All Connects", None))
+        self.actionContact.setText(QCoreApplication.translate("MainWindow", u"Contact", None))
         self.connectButton.setText(QCoreApplication.translate("MainWindow", u"Connect", None))
         self.addButton.setText(QCoreApplication.translate("MainWindow", u"Add", None))
         self.editButton.setText(QCoreApplication.translate("MainWindow", u"Edit", None))
@@ -330,5 +333,6 @@ class Ui_MainWindow(object):
         self.scanSearchLineEdit.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Enter to Search", None))
         self.loadMoreContentButton.setText(QCoreApplication.translate("MainWindow", u"Load More", None))
         self.menuConnects.setTitle(QCoreApplication.translate("MainWindow", u"Connects", None))
+        self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
     # retranslateUi
 

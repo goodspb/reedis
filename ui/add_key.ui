@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>295</width>
-    <height>129</height>
+    <width>293</width>
+    <height>131</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -16,69 +16,86 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
-  <property name="windowTitle">
-   <string>Dialog</string>
+  <property name="minimumSize">
+   <size>
+    <width>293</width>
+    <height>131</height>
+   </size>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout">
+  <property name="maximumSize">
+   <size>
+    <width>293</width>
+    <height>131</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Add Key</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Key Name:</string>
-       </property>
-      </widget>
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="2,5">
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Key Name:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="keyNameInput"/>
+       </item>
+      </layout>
      </item>
      <item>
-      <widget class="QLineEdit" name="keyNameInput"/>
+      <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="2,5">
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Key Type:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="keyTypeList">
+         <item>
+          <property name="text">
+           <string notr="true">string</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string notr="true">hash</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string notr="true">list</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string notr="true">set</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string notr="true">zset</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>stream</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
-   <item row="1" column="0">
-    <widget class="QSplitter" name="splitter">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <widget class="QLabel" name="label_2">
-      <property name="text">
-       <string>Key Type:</string>
-      </property>
-     </widget>
-     <widget class="QComboBox" name="keyTypeList">
-      <item>
-       <property name="text">
-        <string notr="true">string</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string notr="true">hash</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string notr="true">list</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string notr="true">set</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string notr="true">zset</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>stream</string>
-       </property>
-      </item>
-     </widget>
-    </widget>
-   </item>
-   <item row="2" column="0">
+   <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>

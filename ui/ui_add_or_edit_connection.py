@@ -396,7 +396,7 @@ class Ui_AddOrEditConnectionDialog(object):
     # setupUi
 
     def retranslateUi(self, AddOrEditConnectionDialog):
-        AddOrEditConnectionDialog.setWindowTitle(QCoreApplication.translate("AddOrEditConnectionDialog", u"Add Connection", None))
+        AddOrEditConnectionDialog.setWindowTitle(QCoreApplication.translate("AddOrEditConnectionDialog", u"Add/Edit Connection", None))
         self.label.setText(QCoreApplication.translate("AddOrEditConnectionDialog", u"*Host", None))
         self.hostEdit.setText(QCoreApplication.translate("AddOrEditConnectionDialog", u"127.0.0.1", None))
         self.label_4.setText(QCoreApplication.translate("AddOrEditConnectionDialog", u"Username", None))

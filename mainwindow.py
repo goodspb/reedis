@@ -11,6 +11,7 @@ from database import get_connections, get_connection, delete_connection
 from dialog.add_member_dialog import AddMemberDialog
 from dialog.add_or_edit_connection_dialog import AddOrEditConnectionDialog
 from dialog.add_key_dialog import AddKeyDialog
+from dialog.contact_dialog import ContactDialog
 from redis_handler import get_redis_connection, get_dbs, get_keys
 from ui.ui_main import Ui_MainWindow
 
@@ -27,6 +28,10 @@ class MainWindow(QMainWindow):
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
+        self.ui.actionAdd.triggered.connect(self.add_or_edit_button_clicked)
+        self.ui.actionContact.triggered.connect(self.contact_menu_clicked)
+
         self.ui.connectButton.clicked.connect(self.connect_button_clicked)
         self.ui.addButton.clicked.connect(self.add_or_edit_button_clicked)
         self.ui.editButton.clicked.connect(self.add_or_edit_button_clicked)
@@ -75,6 +80,10 @@ class MainWindow(QMainWindow):
         self.table_content_editing_old = None
         self.connected_redis = None
         self.shown_redis_key = None
+
+    def contact_menu_clicked(self):
+        contact_dialog = ContactDialog(parent=self)
+        contact_dialog.exec()
 
     def refresh_connections(self):
         self.ui.connectionList.clear()

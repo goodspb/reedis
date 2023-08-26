@@ -354,9 +354,15 @@
      <string>Connects</string>
     </property>
     <addaction name="actionAdd"/>
-    <addaction name="actionAll_Connects"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionContact"/>
    </widget>
    <addaction name="menuConnects"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionAdd">
@@ -364,9 +370,9 @@
     <string>Add</string>
    </property>
   </action>
-  <action name="actionAll_Connects">
+  <action name="actionContact">
    <property name="text">
-    <string>All Connects</string>
+    <string>Contact</string>
    </property>
   </action>
  </widget>

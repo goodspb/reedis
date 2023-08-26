@@ -16,21 +16,25 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QComboBox, QDialog,
-    QDialogButtonBox, QGridLayout, QHBoxLayout, QLabel,
-    QLineEdit, QSizePolicy, QSplitter, QWidget)
+    QDialogButtonBox, QHBoxLayout, QLabel, QLineEdit,
+    QSizePolicy, QVBoxLayout, QWidget)
 
 class Ui_AddKeyDialog(object):
     def setupUi(self, AddKeyDialog):
         if not AddKeyDialog.objectName():
             AddKeyDialog.setObjectName(u"AddKeyDialog")
-        AddKeyDialog.resize(295, 129)
+        AddKeyDialog.resize(293, 131)
         sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(AddKeyDialog.sizePolicy().hasHeightForWidth())
         AddKeyDialog.setSizePolicy(sizePolicy)
-        self.gridLayout = QGridLayout(AddKeyDialog)
-        self.gridLayout.setObjectName(u"gridLayout")
+        AddKeyDialog.setMinimumSize(QSize(293, 131))
+        AddKeyDialog.setMaximumSize(QSize(293, 131))
+        self.verticalLayout_2 = QVBoxLayout(AddKeyDialog)
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.verticalLayout = QVBoxLayout()
+        self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.label = QLabel(AddKeyDialog)
@@ -43,16 +47,19 @@ class Ui_AddKeyDialog(object):
 
         self.horizontalLayout.addWidget(self.keyNameInput)
 
+        self.horizontalLayout.setStretch(0, 2)
+        self.horizontalLayout.setStretch(1, 5)
 
-        self.gridLayout.addLayout(self.horizontalLayout, 0, 0, 1, 1)
+        self.verticalLayout.addLayout(self.horizontalLayout)
 
-        self.splitter = QSplitter(AddKeyDialog)
-        self.splitter.setObjectName(u"splitter")
-        self.splitter.setOrientation(Qt.Horizontal)
-        self.label_2 = QLabel(self.splitter)
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.label_2 = QLabel(AddKeyDialog)
         self.label_2.setObjectName(u"label_2")
-        self.splitter.addWidget(self.label_2)
-        self.keyTypeList = QComboBox(self.splitter)
+
+        self.horizontalLayout_2.addWidget(self.label_2)
+
+        self.keyTypeList = QComboBox(AddKeyDialog)
         self.keyTypeList.addItem(u"string")
         self.keyTypeList.addItem(u"hash")
         self.keyTypeList.addItem(u"list")
@@ -60,9 +67,16 @@ class Ui_AddKeyDialog(object):
         self.keyTypeList.addItem(u"zset")
         self.keyTypeList.addItem("")
         self.keyTypeList.setObjectName(u"keyTypeList")
-        self.splitter.addWidget(self.keyTypeList)
 
-        self.gridLayout.addWidget(self.splitter, 1, 0, 1, 1)
+        self.horizontalLayout_2.addWidget(self.keyTypeList)
+
+        self.horizontalLayout_2.setStretch(0, 2)
+        self.horizontalLayout_2.setStretch(1, 5)
+
+        self.verticalLayout.addLayout(self.horizontalLayout_2)
+
+
+        self.verticalLayout_2.addLayout(self.verticalLayout)
 
         self.buttonBox = QDialogButtonBox(AddKeyDialog)
         self.buttonBox.setObjectName(u"buttonBox")
@@ -70,7 +84,7 @@ class Ui_AddKeyDialog(object):
         self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Ok)
         self.buttonBox.setCenterButtons(True)
 
-        self.gridLayout.addWidget(self.buttonBox, 2, 0, 1, 1)
+        self.verticalLayout_2.addWidget(self.buttonBox)
 
 
         self.retranslateUi(AddKeyDialog)
@@ -81,7 +95,7 @@ class Ui_AddKeyDialog(object):
     # setupUi
 
     def retranslateUi(self, AddKeyDialog):
-        AddKeyDialog.setWindowTitle(QCoreApplication.translate("AddKeyDialog", u"Dialog", None))
+        AddKeyDialog.setWindowTitle(QCoreApplication.translate("AddKeyDialog", u"Add Key", None))
         self.label.setText(QCoreApplication.translate("AddKeyDialog", u"Key Name:", None))
         self.label_2.setText(QCoreApplication.translate("AddKeyDialog", u"Key Type:", None))
         self.keyTypeList.setItemText(5, QCoreApplication.translate("AddKeyDialog", u"stream", None))
