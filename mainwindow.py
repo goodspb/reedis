@@ -12,6 +12,7 @@ from dialog.add_member_dialog import AddMemberDialog
 from dialog.add_or_edit_connection_dialog import AddOrEditConnectionDialog
 from dialog.add_key_dialog import AddKeyDialog
 from dialog.contact_dialog import ContactDialog
+from redis_data_handler.redis_data_handler_factory import RedisDataHandlerFactory
 from redis_handler import get_redis_connection, get_dbs, get_keys
 from ui.ui_main import Ui_MainWindow
 
@@ -245,118 +246,9 @@ class MainWindow(QMainWindow):
             model.removeColumns(0, model.columnCount())
             self.ui.loadMoreContentButton.setDisabled(False)
             self.current_cursor = 0
-        if key_type == 'string':
-            self.ui.stackedContents.setCurrentIndex(0)
-            content = r.get(key)
-            content_str = content.decode('utf-8', errors='ignore')
-            print(f"key_click string value {content_str}, size: {len(content_str)}")
-            self.ui.sizeLabel.setText(f"Size: {len(content_str)}")
-            content_type = self.ui.contentTypeList.currentText()
-            print(f"content type: {content_type}")
-            try:
-                if content_type == 'Json':
-                    content_str = json.dumps(json.loads(content_str), indent=4)
-                elif content_type == 'Django':
-                    content_str = pickle.loads(content)
-            except Exception as err:
-                print("content type convert error", err)
-            self.ui.contentStrEdit.setText(content_str)
-        elif key_type == 'list':
-            self.ui.stackedContents.setCurrentIndex(1)
-            if self.current_cursor != -1:
-                lst = r.lrange(key, self.current_cursor, self.current_cursor + count - 1)
-                if len(lst) == count:
-                    self.current_cursor += count
-                else:
-                    self.ui.loadMoreContentButton.setDisabled(True)
-                    self.current_cursor = -1
-                print(f"key_click, redis_list_index: {self.current_cursor}, list value: {lst}")
-                model.setHorizontalHeaderLabels(['Value'])
-                index = model.rowCount()
-                for item in lst:
-                    model.insertRow(index)
-                    model.setData(model.index(index, 0), item.decode('utf-8', errors='ignore'))
-                    index += 1
-        elif key_type == 'hash':
-            self.ui.scanSearchLineEdit.show()
-            self.ui.stackedContents.setCurrentIndex(1)
-            if self.current_cursor != -1:
-                cursor, lst = r.hscan(key, self.current_cursor, scan_search_keyword, count)
-                print(f"key_click hash value: {lst}, cursor: {cursor}")
-                if cursor == 0:
-                    self.current_cursor = -1
-                    self.ui.loadMoreContentButton.setDisabled(True)
-                else:
-                    self.current_cursor = cursor
-                model.setHorizontalHeaderLabels(['Key', 'Value'])
-                index = model.rowCount()
-                for k, v in lst.items():
-                    model.insertRow(index)
-                    model.setData(model.index(index, 0), k.decode('utf-8', errors='ignore'))
-                    model.setData(model.index(index, 1), v.decode('utf-8', errors='ignore'))
-                    index += 1
-        elif key_type == 'set':
-            self.ui.scanSearchLineEdit.show()
-            self.ui.stackedContents.setCurrentIndex(1)
-            if self.current_cursor != -1:
-                cursor, lst = r.sscan(key, self.current_cursor, scan_search_keyword, count)
-                print(f"key_click set value: {lst}, cursor: {cursor}")
-                if cursor == 0:
-                    self.current_cursor = -1
-                    self.ui.loadMoreContentButton.setDisabled(True)
-                else:
-                    self.current_cursor = cursor
-                model.setHorizontalHeaderLabels(['Value'])
-                index = model.rowCount()
-                for item in lst:
-                    model.insertRow(index)
-                    model.setData(model.index(index, 0), item.decode('utf-8', errors='ignore'))
-                    index += 1
-        elif key_type == 'zset':
-            self.ui.scanSearchLineEdit.show()
-            self.ui.stackedContents.setCurrentIndex(1)
-            print(f"current_cursor: {self.current_cursor}, count:{count}")
-            if self.current_cursor != -1:
-                cursor, lst = r.zscan(key, self.current_cursor, scan_search_keyword, count)
-                print(f"key_click zset value: {lst}, cursor: {cursor}")
-                if cursor == 0:
-                    self.current_cursor = -1
-                    self.ui.loadMoreContentButton.setDisabled(True)
-                else:
-                    self.current_cursor = cursor
-                model.setHorizontalHeaderLabels(['Score', 'Member'])
-                index = model.rowCount()
-                for item in lst:
-                    member, score = item
-                    model.insertRow(index)
-                    model.setData(model.index(index, 0), member.decode('utf-8', errors='ignore'))
-                    model.setData(model.index(index, 1), score)
-                    index += 1
-        elif key_type == 'stream':
-            self.ui.maxLabel.show()
-            self.ui.maxLineEdit.show()
-            self.ui.minLabel.show()
-            self.ui.minLineEdit.show()
-            self.ui.stackedContents.setCurrentIndex(1)
-            # stream does not support pagination
-            self.ui.loadMoreContentButton.setDisabled(True)
-            lst = r.xrange(key, self.ui.minLineEdit.text(), self.ui.maxLineEdit.text())
-            print(f"key_click stream value: {lst}")
-            model.setHorizontalHeaderLabels(['ID', 'Value'])
-            index = 0
-            for item in lst:
-                stream_id, stream_value = item
-                print(f"stream_id: {stream_id}, stream_value: {stream_value}")
-                stream_value_dict_str = {k.decode('utf-8', errors='ignore'): v.decode('utf-8', errors='ignore')
-                                         for k, v in stream_value.items()}
-                model.insertRow(index)
-                model.setData(model.index(index, 0), stream_id.decode('utf-8', errors='ignore'))
-                model_item = model.item(index, 0)
-                model_item.setFlags(model_item.flags() & ~Qt.ItemIsEditable)
-                model.setData(model.index(index, 1), json.dumps(stream_value_dict_str))
-                model_item2 = model.item(index, 1)
-                model_item2.setFlags(model_item2.flags() & ~Qt.ItemIsEditable)
-                index += 1
+        # use redis data handler
+        redis_data_handler = RedisDataHandlerFactory.get_data_handler(r, self, key_type)
+        redis_data_handler.update_content(key, count=count, scan_search_keyword=scan_search_keyword)
 
     def load_more_content_clicked(self):
         r = self.connected_redis
@@ -447,25 +339,9 @@ class MainWindow(QMainWindow):
             return
         key = redis_key['key']
         key_type = redis_key['type']
-        if key_type == 'list':
-            r.lrem(key, current_index.row(), r.lindex(key, current_index.row()))
-        elif key_type == 'hash':
-            field_index = self.ui.contentTable.model().index(current_index.row(), 0)
-            field = self.ui.contentTable.model().data(field_index)
-            print(f"field: {field}")
-            r.hdel(key, field)
-        elif key_type == 'set':
-            r.srem(key, current_data)
-        elif key_type == 'zset':
-            member_index = self.ui.contentTable.model().index(current_index.row(), 0)
-            member = self.ui.contentTable.model().data(member_index)
-            print(f"member: {member}")
-            r.zrem(key, member)
-        elif key_type == 'stream':
-            stream_id_index = self.ui.contentTable.model().index(current_index.row(), 0)
-            stream_id = self.ui.contentTable.model().data(stream_id_index)
-            print(f"stream_id: {stream_id}")
-            r.xdel(key, stream_id)
+        # use redis data handler
+        redis_data_handler = RedisDataHandlerFactory.get_data_handler(r, self, key_type)
+        redis_data_handler.delete_content(key, current_index, current_data)
         self._update_content(r, key, key_type)
 
     def stream_min_or_max_press(self):
@@ -491,44 +367,9 @@ class MainWindow(QMainWindow):
             return
         key = redis_key['key']
         key_type = redis_key['type']
-        model = self.ui.contentTable.model()
-        if key_type == 'list':
-            r.lset(key, index.row(), index.data())
-        elif key_type == 'hash':
-            field_index = model.index(index.row(), 0)
-            field = model.data(field_index)
-            value_index = model.index(index.row(), 1)
-            value = model.data(value_index)
-            print(f"field: {field}, value: {value}")
-            # change field
-            if index.column() == 0:
-                # add new field
-                r.hset(key, field, self.table_content_editing_old[1])
-                # delete old field
-                r.hdel(key, self.table_content_editing_old[0])
-            # change value
-            else:
-                r.hset(key, field, value)
-        elif key_type == 'set':
-            # add new set
-            r.sadd(key, index.data())
-            # delete old set
-            r.srem(key, self.table_content_editing_old[0])
-        elif key_type == 'zset':
-            member_index = model.index(index.row(), 0)
-            member = model.data(member_index)
-            score_index = model.index(index.row(), 1)
-            score = model.data(score_index)
-            print(f"member: {member}, score: {score}")
-            # change member
-            if index.column() == 0:
-                # add new member
-                r.zadd(key, {member: self.table_content_editing_old[1]})
-                # delete old member
-                r.zrem(key, self.table_content_editing_old[0])
-            # change score
-            else:
-                r.zadd(key, {member: score})
+        # use redis data handler
+        redis_data_handler = RedisDataHandlerFactory.get_data_handler(r, self, key_type)
+        redis_data_handler.edit_content(key, index)
         self.table_content_editing_old = None
 
 
