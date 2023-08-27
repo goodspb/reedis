@@ -1,19 +1,16 @@
 # This Python file uses the following encoding: utf-8
-import json
-import pickle
-import sys
 
 from PySide6.QtCore import QStringListModel, QModelIndex, Qt, QPoint
 from PySide6.QtGui import QStandardItemModel, QAction, QCursor
-from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QMenu, QHeaderView
+from PySide6.QtWidgets import QMainWindow, QMessageBox, QMenu, QHeaderView
 
-from database import get_connections, get_connection, delete_connection
+from database.database_handler import get_connections, get_connection, delete_connection
 from dialog.add_member_dialog import AddMemberDialog
 from dialog.add_or_edit_connection_dialog import AddOrEditConnectionDialog
 from dialog.add_key_dialog import AddKeyDialog
 from dialog.contact_dialog import ContactDialog
-from redis_data_handler.redis_data_handler_factory import RedisDataHandlerFactory
-from redis_handler import get_redis_connection, get_dbs, get_keys
+from redis_handler.redis_data_handler.redis_data_handler_factory import RedisDataHandlerFactory
+from redis_handler.redis_handler import get_redis_connection, get_dbs, get_keys
 from ui.ui_main import Ui_MainWindow
 
 
@@ -24,8 +21,9 @@ from ui.ui_main import Ui_MainWindow
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, app=None):
         super().__init__(parent)
+        self.app = app
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -326,7 +324,7 @@ class MainWindow(QMainWindow):
         current_index = self.ui.contentTable.currentIndex()
         current_data = self.ui.contentTable.model().data(current_index)
         print(f"table_content_copy current index: {current_index}, current data: {current_data}")
-        cb = app.clipboard()
+        cb = self.app.clipboard()
         cb.setText(current_data)
 
     def table_content_delete(self):
@@ -371,10 +369,3 @@ class MainWindow(QMainWindow):
         redis_data_handler = RedisDataHandlerFactory.get_data_handler(r, self, key_type)
         redis_data_handler.edit_content(key, index)
         self.table_content_editing_old = None
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    widget = MainWindow()
-    widget.show()
-    sys.exit(app.exec())

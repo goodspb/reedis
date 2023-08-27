@@ -2,7 +2,7 @@ from abc import ABC
 
 from PySide6.QtCore import QModelIndex
 
-from redis_data_handler.redis_data_handler import RedisDataHandler
+from redis_handler.redis_data_handler.redis_data_handler import RedisDataHandler
 
 
 class ZsetHandler(RedisDataHandler, ABC):

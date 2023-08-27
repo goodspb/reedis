@@ -1,12 +1,12 @@
 from redis import Redis
 
-from redis_data_handler.hash_handler import HashHandler
-from redis_data_handler.list_handler import ListHandler
-from redis_data_handler.redis_data_handler import RedisDataHandler
-from redis_data_handler.set_handler import SetHandler
-from redis_data_handler.stream_handler import StreamHandler
-from redis_data_handler.string_handler import StringHandler
-from redis_data_handler.zset_handler import ZsetHandler
+from redis_handler.redis_data_handler.hash_handler import HashHandler
+from redis_handler.redis_data_handler.list_handler import ListHandler
+from redis_handler.redis_data_handler.redis_data_handler import RedisDataHandler
+from redis_handler.redis_data_handler.set_handler import SetHandler
+from redis_handler.redis_data_handler.stream_handler import StreamHandler
+from redis_handler.redis_data_handler.string_handler import StringHandler
+from redis_handler.redis_data_handler.zset_handler import ZsetHandler
 
 
 class RedisDataHandlerFactory:

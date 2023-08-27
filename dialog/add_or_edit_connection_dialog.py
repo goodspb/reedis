@@ -1,7 +1,7 @@
 import sys
 from PySide6.QtWidgets import QDialog, QMessageBox, QLayout, QWidget, QSpacerItem, QFileDialog
 
-from database import get_connection, add_or_edit_connections, Connection
+from database.database_handler import get_connection, add_or_edit_connections, Connection
 from ui.ui_add_or_edit_connection import Ui_AddOrEditConnectionDialog
 
 
