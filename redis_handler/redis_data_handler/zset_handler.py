@@ -13,7 +13,7 @@ class ZsetHandler(RedisDataHandler, ABC):
         model = self.window.ui.contentTable.model()
 
         self.window.ui.scanSearchLineEdit.show()
-        self.window.ui.stackedContents.setCurrentIndex(1)
+        self.window.ui.stackedContents.setCurrentIndex(2)
         print(f"current_cursor: {self.window.current_cursor}, count:{count}")
         if self.window.current_cursor == -1:
             return

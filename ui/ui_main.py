@@ -164,6 +164,35 @@ class Ui_MainWindow(object):
 
         self.stackedContents = QStackedWidget(self.centralwidget)
         self.stackedContents.setObjectName(u"stackedContents")
+        self.infoTablePage = QWidget()
+        self.infoTablePage.setObjectName(u"infoTablePage")
+        self.verticalLayout_3 = QVBoxLayout(self.infoTablePage)
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.horizontalLayout_5 = QHBoxLayout()
+        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+        self.label = QLabel(self.infoTablePage)
+        self.label.setObjectName(u"label")
+
+        self.horizontalLayout_5.addWidget(self.label)
+
+        self.horizontalSpacer_3 = QSpacerItem(288, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_5.addItem(self.horizontalSpacer_3)
+
+        self.infoSearchLineEdit = QLineEdit(self.infoTablePage)
+        self.infoSearchLineEdit.setObjectName(u"infoSearchLineEdit")
+
+        self.horizontalLayout_5.addWidget(self.infoSearchLineEdit)
+
+
+        self.verticalLayout_3.addLayout(self.horizontalLayout_5)
+
+        self.infoTable = QTableView(self.infoTablePage)
+        self.infoTable.setObjectName(u"infoTable")
+
+        self.verticalLayout_3.addWidget(self.infoTable)
+
+        self.stackedContents.addWidget(self.infoTablePage)
         self.contentStrEditPage = QWidget()
         self.contentStrEditPage.setObjectName(u"contentStrEditPage")
         self.contentStrEditPage.setAutoFillBackground(False)
@@ -298,7 +327,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.stackedContents.setCurrentIndex(1)
+        self.stackedContents.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -322,6 +351,9 @@ class Ui_MainWindow(object):
         self.loadMoreKeyButton.setText(QCoreApplication.translate("MainWindow", u"Load More", None))
         self.addKeyButton.setText(QCoreApplication.translate("MainWindow", u"Add Key", None))
         self.refreshKeysButton.setText(QCoreApplication.translate("MainWindow", u"Refresh Keys", None))
+        self.label.setText(QCoreApplication.translate("MainWindow", u"Redis Info List", None))
+        self.infoSearchLineEdit.setText("")
+        self.infoSearchLineEdit.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Search Key", None))
 
         self.sizeLabel.setText(QCoreApplication.translate("MainWindow", u"Size: 0", None))
         self.addMemberButton.setText(QCoreApplication.translate("MainWindow", u"Add member", None))

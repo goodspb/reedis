@@ -15,7 +15,7 @@ class StreamHandler(RedisDataHandler, ABC):
         self.window.ui.maxLineEdit.show()
         self.window.ui.minLabel.show()
         self.window.ui.minLineEdit.show()
-        self.window.ui.stackedContents.setCurrentIndex(1)
+        self.window.ui.stackedContents.setCurrentIndex(2)
         # stream does not support pagination
         self.window.ui.loadMoreContentButton.setDisabled(True)
         lst = self.r.xrange(key, self.window.ui.minLineEdit.text(), self.window.ui.maxLineEdit.text())

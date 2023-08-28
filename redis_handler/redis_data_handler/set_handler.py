@@ -13,7 +13,7 @@ class SetHandler(RedisDataHandler, ABC):
         model = self.window.ui.contentTable.model()
 
         self.window.ui.scanSearchLineEdit.show()
-        self.window.ui.stackedContents.setCurrentIndex(1)
+        self.window.ui.stackedContents.setCurrentIndex(2)
         if self.window.current_cursor == -1:
             return
         cursor, lst = self.r.sscan(key, self.window.current_cursor, scan_search_keyword, count)

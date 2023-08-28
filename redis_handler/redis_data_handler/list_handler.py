@@ -10,7 +10,7 @@ class ListHandler(RedisDataHandler, ABC):
     def update_content(self, key: str, *args, **kw):
         count = kw.get("count", 100)
         model = self.window.ui.contentTable.model()
-        self.window.ui.stackedContents.setCurrentIndex(1)
+        self.window.ui.stackedContents.setCurrentIndex(2)
         if self.window.current_cursor == -1:
             return
         lst = self.r.lrange(key, self.window.current_cursor, self.window.current_cursor + count - 1)

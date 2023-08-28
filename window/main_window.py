@@ -1,4 +1,5 @@
 # This Python file uses the following encoding: utf-8
+import json
 
 from PySide6.QtCore import QStringListModel, QModelIndex, Qt, QPoint
 from PySide6.QtGui import QStandardItemModel, QAction, QCursor
@@ -12,6 +13,7 @@ from dialog.contact_dialog import ContactDialog
 from redis_handler.redis_data_handler.redis_data_handler_factory import RedisDataHandlerFactory
 from redis_handler.redis_handler import get_redis_connection, get_dbs, get_keys
 from ui.ui_main import Ui_MainWindow
+from redis import Redis
 
 
 # Important:
@@ -45,6 +47,12 @@ class MainWindow(QMainWindow):
         self.ui.dbList.activated.connect(self.db_list_selected)
         self.ui.searchInput.returnPressed.connect(self._search_input_key)
 
+        info_table_model = QStandardItemModel()
+        info_table_header = self.ui.infoTable.horizontalHeader()
+        info_table_header.setSectionResizeMode(QHeaderView.Stretch)
+        self.ui.infoTable.setModel(info_table_model)
+        self.ui.infoSearchLineEdit.textChanged.connect(self.info_search_text_changed)
+
         self.ui.keyList.clicked.connect(self.key_click)
         self.ui.keyList.doubleClicked.connect(self.key_double_clicked)
         self.ui.keyList.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
@@ -62,7 +70,7 @@ class MainWindow(QMainWindow):
         content_table_header.setSectionResizeMode(QHeaderView.Stretch)
         content_table_model.dataChanged.connect(self.table_content_edit)
         self.ui.contentTable.setModel(content_table_model)
-        self.current_cursor=0
+        self.current_cursor = 0
 
         self.ui.addMemberButton.clicked.connect(self.add_member_clicked)
         self.ui.contentTypeList.activated.connect(self.content_type_list_selected)
@@ -114,6 +122,31 @@ class MainWindow(QMainWindow):
             self.ui.dbList.addItem(f"DB{db_idx}", db_idx)
 
         self._search_input_key()
+        self._show_info(r)
+
+    def info_search_text_changed(self):
+        if not self.connected_redis:
+            return
+        self._show_info(self.connected_redis)
+
+    def _show_info(self, r: Redis):
+        self.ui.stackedContents.setCurrentIndex(0)
+        model = self.ui.infoTable.model()
+        model.removeRows(0, model.rowCount())
+        model.removeColumns(0, model.columnCount())
+        model.setHorizontalHeaderLabels(['Key', 'Value'])
+        info_list = r.info()
+        index = model.rowCount()
+        search = self.ui.infoSearchLineEdit.text()
+        for k, v in info_list.items():
+            if search and k.find(search) == -1:
+                continue
+            model.insertRow(index)
+            model.setData(model.index(index, 0), k)
+            if type(v) == dict:
+                v = json.dumps(v)
+            model.setData(model.index(index, 1), v)
+            index += 1
 
     def add_or_edit_button_clicked(self):
         button = self.sender()

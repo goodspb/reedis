@@ -10,7 +10,7 @@ from redis_handler.redis_data_handler.redis_data_handler import RedisDataHandler
 class StringHandler(RedisDataHandler, ABC):
 
     def update_content(self, key: str, *args, **kw):
-        self.window.ui.stackedContents.setCurrentIndex(0)
+        self.window.ui.stackedContents.setCurrentIndex(1)
         content = self.r.get(key)
         content_str = content.decode('utf-8', errors='ignore')
         print(f"key_click string value {content_str}, size: {len(content_str)}")
