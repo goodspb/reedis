@@ -478,4 +478,6 @@ Reedis.pyproject.user
 
 # nuitka
 /*.build
-/*.dist
+
+# create-dmg
+*.dmg

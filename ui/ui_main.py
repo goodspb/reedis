@@ -27,7 +27,10 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(846, 604)
+        MainWindow.resize(756, 598)
+        icon = QIcon()
+        icon.addFile(u"../resource/icons/icons.icns", QSize(), QIcon.Normal, QIcon.Off)
+        MainWindow.setWindowIcon(icon)
         self.actionAdd = QAction(MainWindow)
         self.actionAdd.setObjectName(u"actionAdd")
         self.actionContact = QAction(MainWindow)
@@ -309,7 +312,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 846, 24))
+        self.menubar.setGeometry(QRect(0, 0, 756, 24))
         self.menubar.setDefaultUp(True)
         self.menuConnects = QMenu(self.menubar)
         self.menuConnects.setObjectName(u"menuConnects")

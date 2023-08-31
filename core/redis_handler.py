@@ -3,7 +3,7 @@ from redis.sentinel import Sentinel
 from redis.cluster import RedisCluster
 from sshtunnel import SSHTunnelForwarder
 
-from database.database_handler import Connection
+from core.database_handler import Connection
 
 
 def get_redis_connection(connection: Connection):

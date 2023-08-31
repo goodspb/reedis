@@ -1,11 +1,16 @@
-from typing import Optional, List, Type
+from typing import Optional, Type
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Boolean, Column, Integer, String
 from sqlalchemy.orm import sessionmaker
 
-engine = create_engine('sqlite:///reedis.db?check_same_thread=False', echo=True)
+from util.setting_util import get_user_setting_dir
+
+db_file = get_user_setting_dir() + "/reedis.db"
+print(f"db_file: {db_file}")
+
+engine = create_engine(f'sqlite:///{db_file}?check_same_thread=False', echo=True)
 
 Base = declarative_base()
 

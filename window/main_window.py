@@ -5,13 +5,13 @@ from PySide6.QtCore import QStringListModel, QModelIndex, Qt, QPoint
 from PySide6.QtGui import QStandardItemModel, QAction, QCursor
 from PySide6.QtWidgets import QMainWindow, QMessageBox, QMenu, QHeaderView
 
-from database.database_handler import get_connections, get_connection, delete_connection
+from core.database_handler import get_connections, get_connection, delete_connection
 from dialog.add_member_dialog import AddMemberDialog
 from dialog.add_or_edit_connection_dialog import AddOrEditConnectionDialog
 from dialog.add_key_dialog import AddKeyDialog
 from dialog.contact_dialog import ContactDialog
-from redis_handler.redis_data_handler.redis_data_handler_factory import RedisDataHandlerFactory
-from redis_handler.redis_handler import get_redis_connection, get_dbs, get_keys
+from core.redis_data_handler.redis_data_handler_factory import RedisDataHandlerFactory
+from core.redis_handler import get_redis_connection, get_dbs, get_keys
 from ui.ui_main import Ui_MainWindow
 from redis import Redis
 

@@ -6,12 +6,16 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>846</width>
-    <height>604</height>
+    <width>756</width>
+    <height>598</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Reedis</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../resource/icons/icons.icns</normaloff>../resource/icons/icons.icns</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -383,7 +387,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>846</width>
+     <width>756</width>
      <height>24</height>
     </rect>
    </property>
