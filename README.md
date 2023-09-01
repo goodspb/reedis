@@ -19,6 +19,11 @@ mainly with `QT Pyside6` + `SQLAlchemy` + `redis-py`
 
 ## Support Feature
 
+![Reedis](./resource/screenshot/screenshot_reedis.png "Reedis Main Window")
+![Reedis](./resource/screenshot/screenshot_reedis_02.png "Reedis redis info list")
+![Reedis](./resource/screenshot/screenshot_reedis_03.png "Reedis Content Management")
+![Reedis](./resource/screenshot/screenshot_reedis_04.png "Reedis Edit Connection")
+
 1. Redis connection management (Add, Delete, Edit)
 2. Data type support: string, list, hash, set, zset, stream
 3. Key management (Add, Delete, Rename)
