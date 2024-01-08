@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 
 from util.setting_util import get_user_setting_dir
 
-db_file = get_user_setting_dir() + "/reedis.db"
+db_file = get_user_setting_dir() + "reedis.db"
 print(f"db_file: {db_file}")
 
 engine = create_engine(f'sqlite:///{db_file}?check_same_thread=False', echo=True)

@@ -30,12 +30,12 @@ mainly with `QT Pyside6` + `SQLAlchemy` + `redis-py`
 4. Content management (Add, Delete, Edit, Copy)
 5. String content format: raw string, Json, Django pickle
 
-## Not Test Feature
+## Need Tested Feature
 
-- Redis Connection with SSL
-- Redis Connection with SSH
-- Redis Connection with Sentinel
-- Redis Connection with Cluster
+- [x] Redis Connection with SSH
+- [ ] Redis Connection with SSL
+- [ ] Redis Connection with Sentinel
+- [ ] Redis Connection with Cluster
 
 ## TODO List
 
