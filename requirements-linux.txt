@@ -1,0 +1,7 @@
+PySide6==6.6.1
+PySide6_Addons==6.6.1
+PySide6_Essentials==6.6.1
+redis==5.0.1
+SQLAlchemy==2.0.25
+sshtunnel==0.4.0
+Nuitka==1.9.7

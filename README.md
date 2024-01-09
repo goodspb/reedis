@@ -39,7 +39,7 @@ mainly with `QT Pyside6` + `SQLAlchemy` + `redis-py`
 
 ## TODO List
 
-- [ ] Build package for Windows and Linux
+- [x] Build package for Windows and Linux
 - [ ] Support open multi connections at some time
 - [ ] Add more basic setting 
 - [ ] GUI upgrade ( maybe add theme? )
