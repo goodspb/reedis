@@ -6,7 +6,7 @@ from ui.ui_add_or_edit_connection import Ui_AddOrEditConnectionDialog
 
 
 class AddOrEditConnectionDialog(QDialog):
-    def __init__(self, connection_id=None, parent=None):
+    def __init__(self, connection_id=None, connection_index=0, parent=None):
         super().__init__(parent)
         self.ui = Ui_AddOrEditConnectionDialog()
         self.ui.setupUi(self)
@@ -27,6 +27,7 @@ class AddOrEditConnectionDialog(QDialog):
         self.current_connection = get_connection(connection_id)
         print(f"current_connection: {self.current_connection}")
         self._init_data()
+        self.connection_index = connection_index
 
     def _init_data(self):
         if not self.current_connection:
@@ -56,6 +57,9 @@ class AddOrEditConnectionDialog(QDialog):
 
         self.ui.sentinelMasterGroupNameEdit.setText(current_connection.sentinel_master_group_name)
         self.ui.sentinelRedisNodePasswordEdit.setText(current_connection.sentinel_redis_node_password)
+        # add connection name
+        self.ui.connectionNameEdit.setText(current_connection.host + ":" + str(current_connection.port)
+                                           if not current_connection.name else current_connection.name)
 
     def _show_or_hide_layout(self, w: QWidget, hide=True):
         if hide:
@@ -112,10 +116,13 @@ class AddOrEditConnectionDialog(QDialog):
         current_connection.sentinel_master_group_name = self.ui.sentinelMasterGroupNameEdit.text()
         current_connection.sentinel_redis_node_password = self.ui.sentinelRedisNodePasswordEdit.text()
 
+        current_connection.name = self.ui.connectionNameEdit.text() if self.ui.connectionNameEdit.text() else (
+                current_connection.host + ":" + str(current_connection.port))
+
         res, error = add_or_edit_connections(current_connection, is_create)
         if res:
             self.close()
-            self.parent().refresh_connections()
+            self.parent().refresh_connections(self.connection_index)
             QMessageBox.information(self, 'Alert', 'Success', QMessageBox.StandardButton.Ok)
             return
         print(error)

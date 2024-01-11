@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'add_or_edit_connection.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.5.1
+## Created by: Qt User Interface Compiler version 6.6.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -24,7 +24,7 @@ class Ui_AddOrEditConnectionDialog(object):
     def setupUi(self, AddOrEditConnectionDialog):
         if not AddOrEditConnectionDialog.objectName():
             AddOrEditConnectionDialog.setObjectName(u"AddOrEditConnectionDialog")
-        AddOrEditConnectionDialog.resize(444, 658)
+        AddOrEditConnectionDialog.resize(444, 691)
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -88,6 +88,21 @@ class Ui_AddOrEditConnectionDialog(object):
 
 
         self.verticalLayout_4.addLayout(self.horizontalLayout)
+
+        self.horizontalLayout_16 = QHBoxLayout()
+        self.horizontalLayout_16.setObjectName(u"horizontalLayout_16")
+        self.label_20 = QLabel(self.commonWedget)
+        self.label_20.setObjectName(u"label_20")
+
+        self.horizontalLayout_16.addWidget(self.label_20)
+
+        self.connectionNameEdit = QLineEdit(self.commonWedget)
+        self.connectionNameEdit.setObjectName(u"connectionNameEdit")
+
+        self.horizontalLayout_16.addWidget(self.connectionNameEdit)
+
+
+        self.verticalLayout_4.addLayout(self.horizontalLayout_16)
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
@@ -403,6 +418,8 @@ class Ui_AddOrEditConnectionDialog(object):
         self.label_2.setText(QCoreApplication.translate("AddOrEditConnectionDialog", u"*Port", None))
         self.portEdit.setText(QCoreApplication.translate("AddOrEditConnectionDialog", u"6379", None))
         self.label_3.setText(QCoreApplication.translate("AddOrEditConnectionDialog", u"Password", None))
+        self.label_20.setText(QCoreApplication.translate("AddOrEditConnectionDialog", u"Connection name", None))
+        self.connectionNameEdit.setText(QCoreApplication.translate("AddOrEditConnectionDialog", u"127.0.0.1:6379", None))
         self.sshCheckBox.setText(QCoreApplication.translate("AddOrEditConnectionDialog", u"SSH", None))
         self.sslCheckBox.setText(QCoreApplication.translate("AddOrEditConnectionDialog", u"SSL", None))
         self.sentinelCheckBox.setText(QCoreApplication.translate("AddOrEditConnectionDialog", u"Sentinel", None))

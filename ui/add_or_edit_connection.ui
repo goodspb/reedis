@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>444</width>
-    <height>658</height>
+    <height>691</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -85,6 +85,24 @@
         </item>
         <item>
          <widget class="QLineEdit" name="passwordEdit"/>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_16">
+        <item>
+         <widget class="QLabel" name="label_20">
+          <property name="text">
+           <string>Connection name</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="connectionNameEdit">
+          <property name="text">
+           <string>127.0.0.1:6379</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>

@@ -92,13 +92,15 @@ class MainWindow(QMainWindow):
         contact_dialog = ContactDialog(parent=self)
         contact_dialog.exec()
 
-    def refresh_connections(self):
+    def refresh_connections(self, focus_index = 0):
         self.ui.connectionList.clear()
         connections = get_connections()
         if not connections:
             return
         for connection in connections:
-            self.ui.connectionList.addItem(f"{connection.host}@{connection.port}", connection.id)
+            key = connection.name if connection.name else f"{connection.host}:{connection.port}"
+            self.ui.connectionList.addItem(key, connection.id)
+        self.ui.connectionList.setCurrentIndex(focus_index)
 
     def connect_button_clicked(self, s):
         print("connect_button_clicked", s)
@@ -116,13 +118,17 @@ class MainWindow(QMainWindow):
             return
         self.connected_redis = r
 
+        self._search_input_key()
+        redis_info_list = self._show_info(r)
+
         db_count = get_dbs(r)
         print(f"db count:{db_count}")
         for db_idx in range(int(db_count)):
-            self.ui.dbList.addItem(f"DB{db_idx}", db_idx)
-
-        self._search_input_key()
-        self._show_info(r)
+            key = f"db{db_idx}"
+            db_key_count = 0
+            if key in redis_info_list:
+                db_key_count = redis_info_list[key]["keys"]
+            self.ui.dbList.addItem(f"{key} ({db_key_count})", db_idx)
 
     def info_search_text_changed(self):
         if not self.connected_redis:
@@ -147,16 +153,19 @@ class MainWindow(QMainWindow):
                 v = json.dumps(v)
             model.setData(model.index(index, 1), v)
             index += 1
+        return info_list
 
     def add_or_edit_button_clicked(self):
         button = self.sender()
         print(button.text() + ' was clicked')
         connection_id = None
+        current_index = 0
         if str(button.text()).lower() == 'edit':
             current_index = self.ui.connectionList.currentIndex()
             connection_id = self.ui.connectionList.itemData(current_index)
             print(f"add_or_edit_button_clicked, connection_id:{connection_id}")
-        add_connection_dialog = AddOrEditConnectionDialog(connection_id=connection_id, parent=self)
+        add_connection_dialog = AddOrEditConnectionDialog(connection_id=connection_id, connection_index=current_index,
+                                                          parent=self)
         add_connection_dialog.exec()
 
     def delete_button_clicked(self, s):

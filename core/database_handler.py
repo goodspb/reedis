@@ -1,6 +1,6 @@
 from typing import Optional, Type
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, MetaData, Table, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Boolean, Column, Integer, String
 from sqlalchemy.orm import sessionmaker
@@ -39,9 +39,20 @@ class Connection(Base):
     ssl_authority = Column(String(255), default="")
     sentinel_master_group_name = Column(String(255), default="")
     sentinel_redis_node_password = Column(String(255), default="")
+    name = Column(String(255), default="")
 
 
 Base.metadata.create_all(engine, checkfirst=True)
+
+# Get a reference to the existing table
+metadata = MetaData()
+metadata.bind = engine
+connection_table = Table('connections', metadata, autoload_with=engine)
+
+# Add the new column
+with engine.begin() as connection:
+    if not any(column.name == 'name' for column in connection_table.columns):
+        connection.execute(text('ALTER TABLE connections ADD COLUMN name VARCHAR(255) DEFAULT ""'))
 
 SessionLocal = sessionmaker(
     bind=engine,
