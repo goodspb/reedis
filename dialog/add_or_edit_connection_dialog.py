@@ -122,7 +122,10 @@ class AddOrEditConnectionDialog(QDialog):
         res, error = add_or_edit_connections(current_connection, is_create)
         if res:
             self.close()
-            self.parent().refresh_connections(self.connection_index)
+            if is_create:
+                self.parent().ui.connectionList.addItem(current_connection.name, current_connection.id)
+            else:
+                self.parent().ui.connectionList.setItemText(self.connection_index, current_connection.name)
             QMessageBox.information(self, 'Alert', 'Success', QMessageBox.StandardButton.Ok)
             return
         print(error)

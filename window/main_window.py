@@ -43,7 +43,8 @@ class MainWindow(QMainWindow):
         self.ui.loadMoreContentButton.clicked.connect(self.load_more_content_clicked)
         self.ui.addKeyButton.clicked.connect(self.add_or_edit_key_clicked)
         self.ui.refreshKeysButton.clicked.connect(self.refresh_key_clicked)
-        self.refresh_connections()
+        self.init_connection_list()
+        self.ui.connectionList.activated.connect(self.connection_changed)
         self.ui.dbList.activated.connect(self.db_list_selected)
         self.ui.searchInput.returnPressed.connect(self._search_input_key)
 
@@ -86,24 +87,41 @@ class MainWindow(QMainWindow):
         self.key_editing_old = None
         self.table_content_editing_old = None
         self.connected_redis = None
+        self.connected_connection = None
         self.shown_redis_key = None
 
     def contact_menu_clicked(self):
         contact_dialog = ContactDialog(parent=self)
         contact_dialog.exec()
 
-    def refresh_connections(self, focus_index = 0):
-        self.ui.connectionList.clear()
+    def init_connection_list(self):
         connections = get_connections()
         if not connections:
             return
         for connection in connections:
             key = connection.name if connection.name else f"{connection.host}:{connection.port}"
             self.ui.connectionList.addItem(key, connection.id)
-        self.ui.connectionList.setCurrentIndex(focus_index)
+
+    def connection_changed(self, index):
+        print(f"connection changed: {index}")
+        clicked_index = self.ui.connectionList.itemData(index)
+        clicked_connection = get_connection(clicked_index)
+        if not clicked_connection or not self.connected_connection:
+            return
+        self.ui.connectButton.setText(
+            'Disconnect' if clicked_connection.id == self.connected_connection.id else 'Connect')
 
     def connect_button_clicked(self, s):
         print("connect_button_clicked", s)
+        if (self.ui.connectButton.text() == 'Disconnect'):
+            self.connected_redis = None
+            self.connected_connection = None
+            self.ui.connectButton.setText("Connect")
+            self.ui.dbList.clear()
+            self.ui.keyList.model().removeRows(0, self.ui.keyList.model().rowCount())
+            self.ui.infoTable.model().removeRows(0, self.ui.infoTable.model().rowCount())
+            self.ui.contentTable.model().removeRows(0, self.ui.contentTable.model().rowCount())
+            return
         current_index = self.ui.connectionList.currentIndex()
         current_data = self.ui.connectionList.itemData(current_index)
         print(f"current_index: {current_index}, current_data: {current_data}")
@@ -117,10 +135,14 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, 'Error', 'Can not connect to redis.', QMessageBox.StandardButton.Ok)
             return
         self.connected_redis = r
+        self.connected_connection = current_connection
+
+        self.ui.connectButton.setText("Disconnect")
 
         self._search_input_key()
         redis_info_list = self._show_info(r)
 
+        self.ui.dbList.clear()
         db_count = get_dbs(r)
         print(f"db count:{db_count}")
         for db_idx in range(int(db_count)):
@@ -163,7 +185,7 @@ class MainWindow(QMainWindow):
         if str(button.text()).lower() == 'edit':
             current_index = self.ui.connectionList.currentIndex()
             connection_id = self.ui.connectionList.itemData(current_index)
-            print(f"add_or_edit_button_clicked, connection_id:{connection_id}")
+            print(f"add_or_edit_button_clicked, connection_id:{connection_id}, current_index:{current_index}")
         add_connection_dialog = AddOrEditConnectionDialog(connection_id=connection_id, connection_index=current_index,
                                                           parent=self)
         add_connection_dialog.exec()
@@ -176,7 +198,7 @@ class MainWindow(QMainWindow):
         if not res:
             QMessageBox.warning(self, 'Error', 'Can not delete connection.', QMessageBox.StandardButton.Ok)
             return
-        self.refresh_connections()
+        self.ui.connectionList.removeItem(current_index)
         QMessageBox.information(self, 'Success', 'delete connection successfully.', QMessageBox.StandardButton.Ok)
 
     def db_list_selected(self, index):
