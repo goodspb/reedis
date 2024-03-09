@@ -5,6 +5,7 @@ from PySide6.QtCore import QStringListModel, QModelIndex, Qt, QPoint
 from PySide6.QtGui import QStandardItemModel, QAction, QCursor
 from PySide6.QtWidgets import QMainWindow, QMessageBox, QMenu, QHeaderView
 
+from common.constant import CONNECTED_LABEL, DISCONNECT_BTN, CONNECT_BTN
 from core.database_handler import get_connections, get_connection, delete_connection
 from dialog.add_member_dialog import AddMemberDialog
 from dialog.add_or_edit_connection_dialog import AddOrEditConnectionDialog
@@ -87,7 +88,7 @@ class MainWindow(QMainWindow):
         self.key_editing_old = None
         self.table_content_editing_old = None
         self.connected_redis = None
-        self.connected_connection = None
+        self.connected_redis_dict = {}
         self.shown_redis_key = None
 
     def contact_menu_clicked(self):
@@ -105,26 +106,25 @@ class MainWindow(QMainWindow):
     def connection_changed(self, index):
         print(f"connection changed: {index}")
         clicked_index = self.ui.connectionList.itemData(index)
-        clicked_connection = get_connection(clicked_index)
-        if not clicked_connection or not self.connected_connection:
+        if not self.connected_redis_dict.get(clicked_index):
+            self._clear_connection_info()
             return
-        self.ui.connectButton.setText(
-            'Disconnect' if clicked_connection.id == self.connected_connection.id else 'Connect')
+        r = self.connected_redis_dict[clicked_index]
+        self._load_connection_info(r)
 
     def connect_button_clicked(self, s):
         print("connect_button_clicked", s)
-        if (self.ui.connectButton.text() == 'Disconnect'):
-            self.connected_redis = None
-            self.connected_connection = None
-            self.ui.connectButton.setText("Connect")
-            self.ui.dbList.clear()
-            self.ui.keyList.model().removeRows(0, self.ui.keyList.model().rowCount())
-            self.ui.infoTable.model().removeRows(0, self.ui.infoTable.model().rowCount())
-            self.ui.contentTable.model().removeRows(0, self.ui.contentTable.model().rowCount())
-            return
         current_index = self.ui.connectionList.currentIndex()
         current_data = self.ui.connectionList.itemData(current_index)
-        print(f"current_index: {current_index}, current_data: {current_data}")
+        current_text = self.ui.connectionList.itemText(current_index)
+        print(f"current_index: {current_index}, current_data: {current_data}, current_text: {current_text}")
+
+        if self.ui.connectButton.text() == DISCONNECT_BTN:
+            self.connected_redis = None
+            del (self.connected_redis_dict[current_data])
+            self._clear_connection_info()
+            return
+
         current_connection = get_connection(current_data)
         if not current_connection:
             QMessageBox.warning(self, 'Error', 'Can not connect to redis.', QMessageBox.StandardButton.Ok)
@@ -134,11 +134,19 @@ class MainWindow(QMainWindow):
         if not res:
             QMessageBox.warning(self, 'Error', 'Can not connect to redis.', QMessageBox.StandardButton.Ok)
             return
-        self.connected_redis = r
-        self.connected_connection = current_connection
 
-        self.ui.connectButton.setText("Disconnect")
+        # connect success
+        self.ui.connectionList.setItemText(current_index, current_text + CONNECTED_LABEL)
 
+        self.connected_redis = current_data
+        self.connected_redis_dict[current_data] = r
+
+        self._load_connection_info(r)
+
+    def _load_connection_info(self, r):
+        self.ui.connectButton.setText(DISCONNECT_BTN)
+        self.ui.deleteButton.setDisabled(True)
+        self.ui.editButton.setDisabled(True)
         self._search_input_key()
         redis_info_list = self._show_info(r)
 
@@ -152,10 +160,22 @@ class MainWindow(QMainWindow):
                 db_key_count = redis_info_list[key]["keys"]
             self.ui.dbList.addItem(f"{key} ({db_key_count})", db_idx)
 
+    def _clear_connection_info(self):
+        self.ui.deleteButton.setDisabled(False)
+        self.ui.editButton.setDisabled(False)
+        self.ui.connectButton.setText(CONNECT_BTN)
+        self.ui.connectionList.setItemText(self.ui.connectionList.currentIndex(),
+                                           self.ui.connectionList.currentText().replace(CONNECTED_LABEL, ""))
+        self.ui.dbList.clear()
+        self.ui.keyList.model().removeRows(0, self.ui.keyList.model().rowCount())
+        self.ui.infoTable.model().removeRows(0, self.ui.infoTable.model().rowCount())
+        self.ui.contentTable.model().removeRows(0, self.ui.contentTable.model().rowCount())
+
     def info_search_text_changed(self):
         if not self.connected_redis:
             return
-        self._show_info(self.connected_redis)
+        r = self.connected_redis_dict[self.connected_redis]
+        self._show_info(r)
 
     def _show_info(self, r: Redis):
         self.ui.stackedContents.setCurrentIndex(0)
@@ -204,7 +224,7 @@ class MainWindow(QMainWindow):
     def db_list_selected(self, index):
         if not self.connected_redis:
             return
-        r = self.connected_redis
+        r = self.connected_redis_dict[self.connected_redis]
         dbs = get_dbs(r)
         print(f"db_list_selected index: {index}, dbs: {dbs}")
         if index >= int(dbs):
@@ -221,7 +241,7 @@ class MainWindow(QMainWindow):
             model.removeRows(0, model.rowCount())
             self.key_list_cursor = 0
             self.ui.loadMoreKeyButton.setDisabled(False)
-        r = self.connected_redis
+        r = self.connected_redis_dict[self.connected_redis]
         search_input = self.ui.searchInput.text()
         print(f"_search_input_key, key_list_cursor:{self.key_list_cursor} search_input: {search_input}")
         if self.key_list_cursor == -1:
@@ -244,7 +264,7 @@ class MainWindow(QMainWindow):
             return
         k = index.data()
         print(f"key_click key: {k}")
-        r = self.connected_redis
+        r = self.connected_redis_dict[self.connected_redis]
         key_type = r.type(k)
         print(f"key_click type: {key_type}")
         key_type_str = key_type.decode('utf-8', errors='ignore')
@@ -263,7 +283,7 @@ class MainWindow(QMainWindow):
         print(f"key_edited: {index}")
         if self.key_editing_old is None:
             return
-        r = self.connected_redis
+        r = self.connected_redis_dict[self.connected_redis]
         if not r:
             return
         # rename
@@ -281,7 +301,7 @@ class MainWindow(QMainWindow):
         current_index = self.ui.keyList.currentIndex()
         current_data = self.ui.keyList.model().data(current_index)
         print(f"key_delete: {current_index}, {current_data}")
-        r = self.connected_redis
+        r = self.connected_redis_dict[self.connected_redis]
         if not r:
             return
         r.delete(current_data)
@@ -313,14 +333,14 @@ class MainWindow(QMainWindow):
         redis_data_handler.update_content(key, count=count, scan_search_keyword=scan_search_keyword)
 
     def load_more_content_clicked(self):
-        r = self.connected_redis
+        r = self.connected_redis_dict[self.connected_redis]
         redis_key = self.shown_redis_key
         if not r or not redis_key:
             return
         self._update_content(r, redis_key['key'], redis_key['type'], False)
 
     def save_content_clicked(self):
-        r = self.connected_redis
+        r = self.connected_redis_dict[self.connected_redis]
         redis_key = self.shown_redis_key
         if not r or not redis_key:
             return
@@ -347,7 +367,7 @@ class MainWindow(QMainWindow):
                 r.persist(redis_key["key"])
 
     def refresh_content_clicked(self):
-        r = self.connected_redis
+        r = self.connected_redis_dict[self.connected_redis]
         redis_key = self.shown_redis_key
         if not r or not redis_key:
             return
@@ -359,7 +379,7 @@ class MainWindow(QMainWindow):
     def add_or_edit_key_clicked(self):
         if not self.connected_redis:
             return
-        r = self.connected_redis
+        r = self.connected_redis_dict[self.connected_redis]
         add_key_dialog = AddKeyDialog(r, parent=self)
         add_key_dialog.exec()
 
@@ -367,7 +387,7 @@ class MainWindow(QMainWindow):
         self._search_input_key()
 
     def add_member_clicked(self):
-        r = self.connected_redis
+        r = self.connected_redis_dict[self.connected_redis]
         redis_key = self.shown_redis_key
         if not r or not redis_key:
             return
@@ -395,7 +415,7 @@ class MainWindow(QMainWindow):
         current_index: QModelIndex = self.ui.contentTable.currentIndex()
         current_data = self.ui.contentTable.model().data(current_index)
         print(f"table_content_delete current index: {current_index.row()}, current data: {current_data}")
-        r = self.connected_redis
+        r = self.connected_redis_dict[self.connected_redis]
         redis_key = self.shown_redis_key
         if not r or not redis_key:
             return
@@ -423,7 +443,7 @@ class MainWindow(QMainWindow):
         print(f"key_edited, row:{index.row()}, column: {index.column()}, data:{index.data()}")
         if self.table_content_editing_old is None:
             return
-        r = self.connected_redis
+        r = self.connected_redis_dict[self.connected_redis]
         redis_key = self.shown_redis_key
         if not r or not redis_key:
             return
