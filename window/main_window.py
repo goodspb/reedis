@@ -109,7 +109,8 @@ class MainWindow(QMainWindow):
         if not self.connected_redis_dict.get(clicked_index):
             self._clear_connection_info()
             return
-        r = self.connected_redis_dict[clicked_index]
+        self.connected_redis = clicked_index
+        r = self.connected_redis_dict[self.connected_redis]
         self._load_connection_info(r)
 
     def connect_button_clicked(self, s):
@@ -147,7 +148,6 @@ class MainWindow(QMainWindow):
         self.ui.connectButton.setText(DISCONNECT_BTN)
         self.ui.deleteButton.setDisabled(True)
         self.ui.editButton.setDisabled(True)
-        self._search_input_key()
         redis_info_list = self._show_info(r)
 
         self.ui.dbList.clear()
@@ -159,6 +159,8 @@ class MainWindow(QMainWindow):
             if key in redis_info_list:
                 db_key_count = redis_info_list[key]["keys"]
             self.ui.dbList.addItem(f"{key} ({db_key_count})", db_idx)
+        # select default db
+        self.db_list_selected(0)
 
     def _clear_connection_info(self):
         self.ui.deleteButton.setDisabled(False)
